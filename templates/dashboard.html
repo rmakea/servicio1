@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>UPIIZAlmacén</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        /* Animación de flotación */
+        @keyframes float {
+            0% { transform: translateY(0); opacity: 0.3; }
+            50% { transform: translateY(-10px); opacity: 0.6; }
+            100% { transform: translateY(0); opacity: 0.3; }
+        }
+
+        .bubble {
+            position: absolute;
+            border-radius: 9999px;
+            background-color: #852747;
+            opacity: 0.2;
+            animation: float 6s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="relative bg-white flex flex-col min-h-screen overflow-hidden">
+
+    <!-- Header fijo -->
+    <header class="bg-[#852747] text-white px-6 py-4 flex justify-between items-center fixed top-0 left-0 w-full z-50">
+        <h2 class="text-xl font-semibold">Inicio</h2>
+        <div class="flex items-center space-x-4">
+            <span class="text-sm">Nombre de usuario</span>
+            <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+                <i class="fas fa-user text-[#852747]"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenedor principal con padding top para no quedar bajo el header -->
+    <main class="flex-grow pt-16 relative flex items-center justify-center overflow-hidden">
+
+        <!-- Burbujas decorativas flotantes distribuidas en toda la pantalla -->
+        <div class="absolute top-0 left-0 w-full h-full z-0">
+            {% for i in range(30) %}
+            <div class="bubble" style="
+                top: {{ (i * 33) % 100 }}%;
+                left: {{ (i * 47) % 100 }}%;
+                width: {{ 10 + (i % 4) * 5 }}px;
+                height: {{ 10 + (i % 4) * 5 }}px;
+                animation-delay: {{ (i * 0.5) }}s;
+            "></div>
+            {% endfor %}
+        </div>
+
+        <!-- Imagen de fondo grande -->
+        <div class="absolute top-0 left-0 w-full h-full opacity-10 z-0 flex items-center justify-center">
+            <img src="{{ url_for('static', filename='ingalim.png') }}" alt="Logo Ingeniería en Alimentos" class="w-[80%] h-auto object-contain">
+        </div>
+
+        <!-- Contenedor de botones -->
+        <div class="relative z-10 grid grid-cols-2 gap-40 p-24">
+
+            <!-- Botón Almacén -->
+            <a href="{{ url_for('inventory') }}" class="flex flex-col items-center bg-[#852747] text-white rounded-3xl px-20 py-12 shadow-lg hover:scale-105 transition-transform">
+                <img src="{{ url_for('static', filename='almacen.png') }}" alt="Almacén" class="w-20 h-20 mb-2">
+                <span class="text-xl font-semibold">Almacén</span>
+            </a>
+
+            <!-- Botón Inventario -->
+            <a href="{{ url_for('inventario_view') }}" class="flex flex-col items-center bg-[#852747] text-white rounded-3xl px-20 py-12 shadow-lg hover:scale-105 transition-transform">
+                <img src="{{ url_for('static', filename='inventario.png') }}" alt="Inventario" class="w-20 h-20 mb-2">
+                <span class="text-xl font-semibold">Inventario</span>
+            </a>
+
+            <!-- Botón Citas -->
+            <a href="{{ url_for('citas') }}" class="flex flex-col items-center bg-[#852747] text-white rounded-3xl px-20 py-12 shadow-lg hover:scale-105 transition-transform">
+                <img src="{{ url_for('static', filename='citas.png') }}" alt="Citas" class="w-20 h-20 mb-2">
+                <span class="text-xl font-semibold">Citas</span>
+            </a>
+
+            <!-- Botón Vales -->
+            <a href="{{ url_for('listar_tickets') }}" class="flex flex-col items-center bg-[#852747] text-white rounded-3xl px-20 py-12 shadow-lg hover:scale-105 transition-transform">
+                <img src="{{ url_for('static', filename='vales.png') }}" alt="Vales" class="w-20 h-20 mb-2">
+                <span class="text-xl font-semibold text-center">Vales de laboratorio</span>
+            </a>
+
+        </div>
+
+    </main>
+
+</body>
+</html>

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LABIIZ - Almacen</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'lab-purple': 'rgb(149,47,87)',
+                        'lab-table': 'rgb(255,255,255)',
+                        'lab-light-purple': '#952f57'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-lg">
+            <!-- Logo -->
+            <div class="p-6 border-b">
+                <div class="flex items-center space-x-3">
+                    <div class="text-center">
+                        <h1 class="text-6xl font-bold text-gray-800">LABIIZ</h1>
+                        <p class="text-center text-gray-500">UPIIZ-IPN</p>
+                        <!-- Logo grande debajo del nombre -->
+                        <div class="flex justify-center mt-2">
+                            <img src="{{ url_for('static', filename='ingalim.png') }}" alt="Logo grande LABIIZ" class="w-24 h-24 object-contain">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="mt-6">
+                <div class="px-4 space-y-2">
+                    <a href="/inicio" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fas fa-home"></i>
+                        <span>Inicio</span>
+                    </a>
+                    <a href="/almacen" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fas fa-boxes"></i>
+                        <span>Almacén</span>
+                    </a>
+                    <a href="/citas" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fas fa-vial"></i>
+                        <span>Citas de laboratorio</span>
+                    </a>
+                    <a href="/inventario" class="flex items-center space-x-3 px-4 py-3 bg-lab-purple text-white rounded-lg">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Inventario</span>
+                    </a>
+                    <a href="/tickets" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fas fa-ticket-alt"></i>
+                        <span>Vales de laboratorio</span>
+                    </a>
+                </div>
+            </nav>
+
+            <!-- Help -->
+            <div class="absolute bottom-4 left-4">
+                <button class="flex items-center space-x-2 text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-question-circle"></i>
+                    <span class="text-sm">??</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-hidden">
+            <!-- Header -->
+            <header class="bg-lab-purple text-white px-6 py-4 flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <h2 class="text-xl font-semibold">Inventario</h2>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm">Nombre de usuario</span>
+                    <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+                        <i class="fas fa-user text-lab-purple"></i>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="p-6 overflow-y-auto h-full">
+                <!-- Search and Actions -->
+                <div class="mb-6 flex justify-between items-center">
+                    <div class="flex items-center space-x-4">
+                        <div class="relative">
+                            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                            <input 
+                                type="text" 
+                                placeholder="Buscar producto"
+                                class="pl-10 pr-4 py-2 border border-gray-300 rounded-full w-80 focus:outline-none focus:ring-2 focus:ring-lab-purple"
+                                id="searchInput"
+                            >
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-chart-line text-blue-500 text-2xl"></i>
+                            <i class="fas fa-chart-bar text-orange-500 text-2xl"></i>
+                        </div>
+                    </div>
+                    
+                </div>
+
+                <!-- Status Cards -->
+                <div class="grid grid-cols-3 gap-4 mb-6">
+                    <div class="bg-white p-4 rounded-lg shadow border-l-4 border-green-500">
+                        <h3 class="text-sm font-medium text-gray-600">Total de productos</h3>
+                        <p class="text-2xl font-bold text-gray-800">125</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow border-l-4 border-red-500">
+                        <h3 class="text-sm font-medium text-gray-600">Bajo stock</h3>
+                        <p class="text-2xl font-bold text-gray-800">7</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow border-l-4 border-yellow-500">
+                        <h3 class="text-sm font-medium text-gray-600">Caducan pronto</h3>
+                        <p class="text-2xl font-bold text-gray-800">3</p>
+                    </div>
+                </div>
+
+                <!-- Inventory Table -->
+                <div class="bg-white rounded-lg shadow overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full" id="inventoryTable">
+                            <thead class="bg-lab-table text-black">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Producto</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Descripción</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Categoría/Tipo</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Cantidad</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Cantidad disponible</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Estado</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Acciones</th>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <span class="text-sm font-medium text-gray-900">Reactivo A</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        Reactivo químico para análisis
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        Químicos
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        2 ml
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        1 ml
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                            <i class="fas fa-exclamation-triangle mr-1"></i>
+                                            Stock bajo
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <button class="text-blue-600 hover:text-blue-900 mr-3">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="text-red-600 hover:text-red-900">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <span class="text-sm font-medium text-gray-900">Reactivo B</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        Reactivo para pruebas especiales
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        Químicos
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        20 ml
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        15 ml
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            <i class="fas fa-check mr-1"></i>
+                                            OK
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <button class="text-blue-600 hover:text-blue-900 mr-3">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="text-red-600 hover:text-red-900">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <span class="text-sm font-medium text-gray-900">Reactivo C</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        Reactivo con fecha de caducidad próxima
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        Químicos
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        5 ml
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        4 ml
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                            <i class="fas fa-clock mr-1"></i>
+                                            Próximo a caducar
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <button class="text-blue-600 hover:text-blue-900 mr-3">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="text-red-600 hover:text-red-900">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Download Button -->
+                <div class="mt-6">
+                    <button class="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors">
+                        <i class="fas fa-download mr-2"></i>
+                        Descargar excel
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('#inventoryTable tr');
+            
+            rows.forEach(row => {
+                const productName = row.querySelector('td span')?.textContent.toLowerCase();
+                if (productName) {
+                    if (productName.includes(searchTerm)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            });
+        });
+
+        // Select all checkboxes functionality
+        function toggleAllCheckboxes() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            const firstCheckbox = checkboxes[0];
+            const isChecked = firstCheckbox.checked;
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = isChecked;
+            });
+        }
+
+        // Add event listeners for actions
+        document.querySelectorAll('.fa-edit').forEach(button => {
+            button.addEventListener('click', function() {
+                alert('Editar producto - Funcionalidad por implementar');
+            });
+        });
+
+        document.querySelectorAll('.fa-trash').forEach(button => {
+            button.addEventListener('click', function() {
+                if (confirm('¿Estás seguro de que quieres eliminar este producto?')) {
+                    this.closest('tr').remove();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
