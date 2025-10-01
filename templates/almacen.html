@@ -314,94 +314,137 @@
     </div>
 
     <!-- ───────────────────── Modal “Añadir material” ───────────────────── -->
-    <div id="addMaterialModal"
-      class="fixed inset-0 z-50 hidden flex items-center justify-center">
-        <!-- Capa oscura (clic = cerrar modal) -->
-        <div id="overlay"
-             class="absolute inset-0 bg-black/50"></div>
+<div id="addMaterialModal"
+  class="fixed inset-0 z-50 hidden flex items-center justify-center">
+    <!-- Capa oscura (clic = cerrar modal) -->
+    <div id="overlay" class="absolute inset-0 bg-black/50"></div>
 
-        <!-- Ventana -->
-        <div class="relative bg-lab-purple text-white rounded-lg shadow-2xl w-[90%] max-w-xl p-8 flex flex-col">
-            <!-- Botón de cerrar -->
-            <button id="closeModalBtn"
-                    class="absolute top-4 right-4 text-white/80 hover:text-white text-2xl leading-none">
-                &times;
-            </button>
+    <!-- Ventana -->
+    <div class="relative bg-lab-purple text-white rounded-lg shadow-2xl w-[90%] max-w-xl p-6 flex flex-col">
+        <!-- Botón de cerrar -->
+        <button id="closeModalBtn"
+                class="absolute top-4 right-4 text-white/80 hover:text-white text-2xl leading-none">
+            &times;
+        </button>
 
-            <h3 class="text-2xl font-semibold mb-6">Añadir nuevo material</h3>
+        <h3 class="text-2xl font-semibold mb-4 text-center">Añadir nuevo material</h3>
 
-            <form id="materialForm" class="space-y-4">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <!-- Zona de carga y vista previa -->
-                    <label for="photoInput"
-                           class="group relative flex items-center justify-center
-                                  bg-white/20 rounded-lg h-32 cursor-pointer overflow-hidden">
-                        <!-- Ícono placeholder -->
-                        <i id="photoPlaceholder"
-                           class="far fa-image text-4xl text-white/60 group-hover:text-white"></i>
+        <form id="materialForm" class="space-y-4">
+            <!-- ── Fila superior: foto y tipo ── -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
+                <!-- Zona de carga y vista previa -->
+                <label for="photoInput"
+                       class="group relative flex items-center justify-center
+                              bg-white/20 rounded-lg h-32 cursor-pointer overflow-hidden">
+                    <i id="photoPlaceholder"
+                       class="far fa-image text-4xl text-white/60 group-hover:text-white"></i>
+                    <img id="photoPreview" alt="preview"
+                         class="absolute inset-0 w-full h-full object-cover hidden" />
+                    <input id="photoInput" type="file" accept="image/*" class="hidden">
+                    <span class="absolute bottom-1 right-1 text-xs bg-black/50 px-2 rounded">
+                      Cambiar foto
+                    </span>
+                </label>
 
-                        <!-- Imagen preview -->
-                        <img id="photoPreview" alt="preview"
-                             class="absolute inset-0 w-full h-full object-cover hidden" />
+                <!-- Tipo y color -->
+                <div class="flex flex-col gap-4">
+                    <select id="tipoSelect" required
+                            class="w-full px-4 py-2 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-white">
+                        <option value="" disabled selected>Selecciona tipo</option>
+                        <option value="material">Material</option>
+                        <option value="reactivo">Reactivo</option>
+                    </select>
 
-                        <!-- Input de archivo -->
-                        <input id="photoInput" type="file" accept="image/*" class="hidden">
-                        <span class="absolute bottom-1 right-1 text-xs bg-black/50 px-2 rounded">
-                          Cambiar foto
-                        </span>
-                    </label>
-
-                    <!-- Campos de texto -->
-                    <div class="space-y-4">
-                        <input type="text" placeholder="Material" required
-                               class="w-full px-4 py-2 rounded-lg text-black
-                                      focus:outline-none focus:ring-2 focus:ring-white" />
-                        <textarea placeholder="Descripción"
-                                  class="w-full px-4 py-2 rounded-lg text-black h-20
-                                         focus:outline-none focus:ring-2 focus:ring-white"></textarea>
+                    <div id="colorContainer" class="hidden">
+                        <select id="colorSelect"
+                                class="w-full px-4 py-2 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-white">
+                            <option value="" disabled selected>Selecciona color</option>
+                            <option value="rojo">Rojo</option>
+                            <option value="blanco">Blanco</option>
+                            <option value="azul">Azul</option>
+                            <option value="amarillo">Amarillo</option>
+                            <option value="verde">Verde</option>
+                            <option value="cafe">Café</option>
+                        </select>
                     </div>
+
+                    <textarea placeholder="Descripción"
+                              class="w-full px-4 py-2 rounded-lg text-black h-24
+                                     focus:outline-none focus:ring-2 focus:ring-white"></textarea>
                 </div>
+            </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <input type="number" placeholder="Agregar cantidad"
-                           class="w-full px-4 py-2 rounded-lg text-black
-                                  focus:outline-none focus:ring-2 focus:ring-white" />
+            <!-- ── Fila inferior: otros datos ── -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <input type="number" placeholder="Agregar cantidad"
+                       class="w-full px-4 py-2 rounded-lg text-black
+                              focus:outline-none focus:ring-2 focus:ring-white" />
 
-                    <input type="text" placeholder="Localización"
-                           class="w-full px-4 py-2 rounded-lg text-black
-                                  focus:outline-none focus:ring-2 focus:ring-white" />
+                <input type="text" placeholder="Localización"
+                       class="w-full px-4 py-2 rounded-lg text-black
+                              focus:outline-none focus:ring-2 focus:ring-white" />
 
-                    <input type="text" placeholder="Categoría"
-                           class="w-full px-4 py-2 rounded-lg text-black
-                                  focus:outline-none focus:ring-2 focus:ring-white" />
+                <input type="text" placeholder="Capacidad"
+                       class="w-full px-4 py-2 rounded-lg text-black
+                              focus:outline-none focus:ring-2 focus:ring-white" />
 
-                    <input type="text" placeholder="Capacidad"
-                           class="w-full px-4 py-2 rounded-lg text-black
-                                  focus:outline-none focus:ring-2 focus:ring-white" />
+                <input type="date" placeholder="Fecha de ingreso"
+                       class="w-full px-4 py-2 rounded-lg text-black
+                              focus:outline-none focus:ring-2 focus:ring-white" />
 
-                    <input type="date" placeholder="Fecha de ingreso"
-                           class="w-full px-4 py-2 rounded-lg text-black
-                                  focus:outline-none focus:ring-2 focus:ring-white" />
+                <input type="text" placeholder="Observaciones"
+                       class="w-full px-4 py-2 rounded-lg text-black
+                              focus:outline-none focus:ring-2 focus:ring-white" />
+            </div>
 
-                    <input type="text" placeholder="Observaciones"
-                           class="w-full px-4 py-2 rounded-lg text-black
-                                  focus:outline-none focus:ring-2 focus:ring-white" />
-                </div>
-
-                <!-- Botones -->
-                <div class="mt-6 flex flex-col sm:flex-row sm:justify-end gap-4">
-                    <button type="button" id="cancelModalBtn"
-                            class="px-6 py-3 bg-yellow-400/90 hover:bg-yellow-400 text-black rounded-lg">
-                        Cancelar
-                    </button>
-                    <button type="submit"
-                            class="px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg">
-                        Agregar
-                    </button>
-                </div>
-            </form>
-        </div>
+            <!-- Botones -->
+            <div class="mt-4 flex flex-col sm:flex-row sm:justify-end gap-4">
+                <button type="button" id="cancelModalBtn"
+                        class="px-6 py-3 bg-yellow-400/90 hover:bg-yellow-400 text-black rounded-lg">
+                    Cancelar
+                </button>
+                <button type="submit"
+                        class="px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg">
+                    Agregar
+                </button>
+            </div>
+        </form>
     </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Vista previa de la foto
+    const fileInput   = document.getElementById('photoInput');
+    const imgPreview  = document.getElementById('photoPreview');
+    const placeholder = document.getElementById('photoPlaceholder');
+
+    fileInput.addEventListener('change', e => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        imgPreview.src = URL.createObjectURL(file);
+        imgPreview.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+    });
+
+    // Mostrar/ocultar select de color si es reactivo
+    const tipoSelect     = document.getElementById('tipoSelect');
+    const colorContainer = document.getElementById('colorContainer');
+    const colorSelect    = document.getElementById('colorSelect');
+
+    tipoSelect.addEventListener('change', () => {
+        if (tipoSelect.value === 'reactivo') {
+            colorContainer.classList.remove('hidden');
+            colorSelect.required = true;
+        } else {
+            colorContainer.classList.add('hidden');
+            colorSelect.required = false;
+        }
+    });
+});
+</script>
+
 
     <!-- ───────────────────── JS ───────────────────── -->
     <script>
