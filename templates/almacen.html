@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>LABIIZ ‑ Almacén</title>
 
-    <!-- Tailwind CSS -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Font Awesome -->
@@ -17,7 +17,7 @@
             theme: {
                 extend: {
                     colors: {
-                        'lab-purple': 'rgb(149,47,87)',      /* morado IPN */
+                        'lab-purple': 'rgb(149,47,87)',
                         'lab-light-purple': '#952f57',
                         'lab-table': 'rgb(255,255,255)'
                     }
@@ -28,336 +28,164 @@
 </head>
 
 <body class="bg-gray-50 min-h-screen">
-    <div class="flex h-screen">
-        <!-- ───────────────────── Sidebar ───────────────────── -->
-        <aside class="w-64 bg-white shadow-lg">
-            <div class="p-6 border-b">
-                <div class="flex items-center space-x-3">
-                    <div class="text-center">
-                        <h1 class="text-6xl font-bold text-gray-800">LABIIZ</h1>
-                        <p class="text-center text-gray-500">UPIIZ-IPN</p>
-                        <!-- Logo grande debajo del nombre -->
-                        <div class="flex justify-center mt-2">
-                            <img src="{{ url_for('static', filename='ingalim.png') }}" alt="Logo grande LABIIZ" class="w-24 h-24 object-contain">
-                        </div>
+<div class="flex h-screen">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white shadow-lg">
+        <div class="p-6 border-b">
+            <div class="flex items-center space-x-3">
+                <div class="text-center">
+                    <h1 class="text-6xl font-bold text-gray-800">LABIIZ</h1>
+                    <p class="text-center text-gray-500">UPIIZ-IPN</p>
+                    <div class="flex justify-center mt-2">
+                        <img src="{{ url_for('static', filename='ingalim.png') }}" alt="Logo grande LABIIZ" class="w-24 h-24 object-contain">
                     </div>
                 </div>
             </div>
+        </div>
+        <nav class="mt-6">
+            <div class="px-4 space-y-2">
+                <a href="/inicio" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                    <i class="fas fa-home"></i><span>Inicio</span>
+                </a>
+                <a href="/almacen" class="flex items-center space-x-3 px-4 py-3 bg-lab-purple text-white rounded-lg">
+                    <i class="fas fa-boxes"></i><span>Almacén</span>
+                </a>
+                <a href="/citas" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                    <i class="fas fa-vial"></i><span>Citas de laboratorio</span>
+                </a>
+                <a href="/inventario" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                    <i class="fas fa-chart-bar"></i><span>Inventario</span>
+                </a>
+                <a href="/tickets" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                    <i class="fas fa-ticket-alt"></i><span>Vales de laboratorio</span>
+                </a>
+            </div>
+        </nav>
+    </aside>
 
-            <nav class="mt-6">
-                <div class="px-4 space-y-2">
-                    <a href="/inicio"
-                       class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-                        <i class="fas fa-home"></i><span>Inicio</span>
-                    </a>
-                    <a href="/almacen"
-                       class="flex items-center space-x-3 px-4 py-3 bg-lab-purple text-white rounded-lg">
-                        <i class="fas fa-boxes"></i><span>Almacén</span>
-                    </a>
-                    <a href="/citas"
-                       class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-                        <i class="fas fa-vial"></i><span>Citas de laboratorio</span>
-                    </a>
-                    <a href="/inventario"
-                       class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-                        <i class="fas fa-chart-bar"></i><span>Inventario</span>
-                    </a>
-                    <a href="/tickets"
-                       class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-                        <i class="fas fa-ticket-alt"></i><span>Vales de laboratorio</span>
-                    </a>
+    <!-- Main content -->
+    <main class="flex-1 overflow-hidden">
+        <!-- Header -->
+        <header class="bg-lab-purple text-white px-6 py-4 flex justify-between items-center">
+            <h2 class="text-xl font-semibold">Almacén</h2>
+            <div class="flex items-center space-x-4">
+                <span class="text-sm">Nombre de usuario</span>
+                <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+                    <i class="fas fa-user text-lab-purple"></i>
                 </div>
-            </nav>
-        </aside>
+            </div>
+        </header>
 
-        <!-- ───────────────────── Main content ───────────────────── -->
-        <main class="flex-1 overflow-hidden">
-            <!-- Header -->
-            <header class="bg-lab-purple text-white px-6 py-4 flex justify-between items-center">
-                <h2 class="text-xl font-semibold">Almacén</h2>
+        <!-- Contenido -->
+        <div class="p-8 space-y-8">
+            <!-- Buscar + añadir -->
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                 <div class="flex items-center space-x-4">
-                    <span class="text-sm">Nombre de usuario</span>
-                    <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                        <i class="fas fa-user text-lab-purple"></i>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Contenido -->
-            <div class="p-8 space-y-8">
-                <!-- Buscar + añadir -->
-                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                    <div class="flex items-center space-x-4">
                     <div class="relative">
-                            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
-                            <input 
-                                type="text" 
-                                placeholder="Buscar producto"
-                                class="pl-10 pr-4 py-2 border border-gray-300 rounded-full w-80 focus:outline-none focus:ring-2 focus:ring-lab-purple"
-                                id="searchInput"
-                            >
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <i class="fas fa-chart-line text-blue-500 text-2xl"></i>
-                            <i class="fas fa-chart-bar text-orange-500 text-2xl"></i>
-                        </div>
-                        </div>
-
-                    <!-- BOTÓN que abrirá el modal -->
-                    <button id="openModalBtn"
-                        class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors
-                               flex items-center justify-center">
-                        <i class="fas fa-plus mr-2"></i>
-                        <span>Añadir nuevo material</span>
-                    </button>
-                </div>
-
-                <!-- Tarjeta resumen -->
-                <div class="bg-white p-4 rounded-lg shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                    <h3 class="text-sm font-medium text-gray-600">Total de productos</h3>
-                    <p class="text-2xl font-bold text-gray-800">125</p>
-                </div>
-
-                <!-- ───────── Tabla de productos (código de barras incluido) ───────── -->
-                <div class="bg-white rounded-lg shadow-lg mb-8">
-                    <div class="w-full overflow-x-auto">
-                        <table class="table-fixed w-full text-sm">
-                            <colgroup>
-                                <col class="w-3/5">
-                                <col class="w-2/5">
-                                <col class="w-1/5">
-                            </colgroup>
-
-                            <thead class="bg-lab-table text-black sticky top-0 z-10">
-                                <tr>
-                                    <th class="px-6 py-3 text-left font-semibold uppercase tracking-wider">Producto</th>
-                                    <th class="px-6 py-3 text-left font-semibold uppercase tracking-wider">Código de Barras</th>
-                                    <th class="px-6 py-3 text-left font-semibold uppercase tracking-wider">Acciones</th>
-                                </tr>
-                            </thead>
-
-                            <tbody class="divide-y divide-gray-200">
-                                <!-- Fila A -->
-                                <tr class="odd:bg-gray-50 hover:bg-gray-100 transition-colors">
-                                    <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900 truncate">
-                                        Reactivo A
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center space-x-4">
-                                            <span class="font-mono truncate">2112345789</span>
-                                            <!-- Código de barras -->
-                                            <svg class="w-16 h-8" viewBox="0 0 80 40" fill="none">
-                                                <rect x="2"  y="8" width="1" height="24" fill="black"/>
-                                                <rect x="4"  y="8" width="2" height="24" fill="black"/>
-                                                <rect x="7"  y="8" width="1" height="24" fill="black"/>
-                                                <rect x="9"  y="8" width="3" height="24" fill="black"/>
-                                                <rect x="13" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="15" y="8" width="2" height="24" fill="black"/>
-                                                <rect x="18" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="20" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="22" y="8" width="2" height="24" fill="black"/>
-                                                <rect x="25" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="27" y="8" width="3" height="24" fill="black"/>
-                                                <rect x="31" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="33" y="8" width="2" height="24" fill="black"/>
-                                                <rect x="36" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="38" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="40" y="8" width="2" height="24" fill="black"/>
-                                                <rect x="43" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="45" y="8" width="3" height="24" fill="black"/>
-                                                <rect x="49" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="51" y="8" width="2" height="24" fill="black"/>
-                                                <rect x="54" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="56" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="58" y="8" width="2" height="24" fill="black"/>
-                                                <rect x="61" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="63" y="8" width="3" height="24" fill="black"/>
-                                                <rect x="67" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="69" y="8" width="2" height="24" fill="black"/>
-                                                <rect x="72" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="74" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="76" y="8" width="2" height="24" fill="black"/>
-                                            </svg>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <button class="text-blue-600 hover:text-blue-800 mr-4">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button class="text-red-600 hover:text-red-800">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <!-- Fila B -->
-                                <tr class="odd:bg-gray-50 hover:bg-gray-100 transition-colors">
-                                    <td class="px-6 py-4 font-medium text-gray-900 truncate">
-                                        Reactivo B
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center space-x-4">
-                                            <span class="font-mono truncate">2112345790</span>
-                                            <!-- Código de barras -->
-                                            <svg class="w-16 h-8" viewBox="0 0 80 40" fill="none">
-                                                <rect x="2"  y="8" width="1" height="24" fill="black"/>
-                                                <rect x="4"  y="8" width="2" height="24" fill="black"/>
-                                                <rect x="7"  y="8" width="1" height="24" fill="black"/>
-                                                <rect x="9"  y="8" width="3" height="24" fill="black"/>
-                                                <rect x="13" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="15" y="8" width="2" height="24" fill="black"/>
-                                                <rect x="18" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="20" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="22" y="8" width="2" height="24" fill="black"/>
-                                                <rect x="25" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="27" y="8" width="3" height="24" fill="black"/>
-                                                <rect x="31" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="33" y="8" width="2" height="24" fill="black"/>
-                                                <rect x="36" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="38" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="40" y="8" width="2" height="24" fill="black"/>
-                                                <rect x="43" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="45" y="8" width="3" height="24" fill="black"/>
-                                                <rect x="49" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="51" y="8" width="2" height="24" fill="black"/>
-                                                <rect x="54" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="56" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="58" y="8" width="2" height="24" fill="black"/>
-                                                <rect x="61" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="63" y="8" width="3" height="24" fill="black"/>
-                                                <rect x="67" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="69" y="8" width="2" height="24" fill="black"/>
-                                                <rect x="72" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="74" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="76" y="8" width="2" height="24" fill="black"/>
-                                            </svg>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <button class="text-blue-600 hover:text-blue-800 mr-4">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button class="text-red-600 hover:text-red-800">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <!-- Fila C -->
-                                <tr class="odd:bg-gray-50 hover:bg-gray-100 transition-colors">
-                                    <td class="px-6 py-4 font-medium text-gray-900 truncate">
-                                        Reactivo C
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center space-x-4">
-                                            <span class="font-mono truncate">2112345791</span>
-                                            <!-- Código de barras -->
-                                            <svg class="w-16 h-8" viewBox="0 0 80 40" fill="none">
-                                                <rect x="2"  y="8" width="1" height="24" fill="black"/>
-                                                <rect x="4"  y="8" width="2" height="24" fill="black"/>
-                                                <rect x="7"  y="8" width="1" height="24" fill="black"/>
-                                                <rect x="9"  y="8" width="3" height="24" fill="black"/>
-                                                <rect x="13" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="15" y="8" width="2" height="24" fill="black"/>
-                                                <rect x="18" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="20" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="22" y="8" width="2" height="24" fill="black"/>
-                                                <rect x="25" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="27" y="8" width="3" height="24" fill="black"/>
-                                                <rect x="31" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="33" y="8" width="2" height="24" fill="black"/>
-                                                <rect x="36" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="38" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="40" y="8" width="2" height="24" fill="black"/>
-                                                <rect x="43" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="45" y="8" width="3" height="24" fill="black"/>
-                                                <rect x="49" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="51" y="8" width="2" height="24" fill="black"/>
-                                                <rect x="54" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="56" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="58" y="8" width="2" height="24" fill="black"/>
-                                                <rect x="61" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="63" y="8" width="3" height="24" fill="black"/>
-                                                <rect x="67" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="69" y="8" width="2" height="24" fill="black"/>
-                                                <rect x="72" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="74" y="8" width="1" height="24" fill="black"/>
-                                                <rect x="76" y="8" width="2" height="24" fill="black"/>
-                                            </svg>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <button class="text-blue-600 hover:text-blue-800 mr-4">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button class="text-red-600 hover:text-red-800">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <!-- Agrega más filas según necesites -->
-                            </tbody>
-                        </table>
+                        <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                        <input 
+                            type="text" 
+                            placeholder="Buscar producto"
+                            class="pl-10 pr-4 py-2 border border-gray-300 rounded-full w-80 focus:outline-none focus:ring-2 focus:ring-lab-purple"
+                            id="searchInput"
+                        >
                     </div>
                 </div>
 
-                <!-- Botón descargar -->
-                <div class="flex justify-end">
-                    <button class="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors flex items-center">
-                        <i class="fas fa-download mr-2"></i>
-                        Descargar Excel
-                    </button>
+                <!-- Botón abrir modal -->
+                <button id="openModalBtn"
+                    class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center">
+                    <i class="fas fa-plus mr-2"></i>
+                    <span>Añadir nuevo material</span>
+                </button>
+            </div>
+
+            <!-- Tarjeta resumen -->
+            <div class="bg-white p-4 rounded-lg shadow border-l-4 border-green-500 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <h3 class="text-sm font-medium text-gray-600">Total de productos</h3>
+                <p class="text-2xl font-bold text-gray-800">125</p>
+            </div>
+
+            <!-- Tabla de productos -->
+            <div class="bg-white rounded-lg shadow-lg mb-8">
+                <div class="w-full overflow-x-auto">
+                    <table class="table-fixed w-full text-sm">
+                        <colgroup>
+                            <col class="w-3/5">
+                            <col class="w-2/5">
+                            <col class="w-1/5">
+                        </colgroup>
+                        <thead class="bg-lab-table text-black sticky top-0 z-10">
+                            <tr>
+                                <th class="px-6 py-3 text-left font-semibold uppercase tracking-wider">Producto</th>
+                                <th class="px-6 py-3 text-left font-semibold uppercase tracking-wider">Código de Barras</th>
+                                <th class="px-6 py-3 text-left font-semibold uppercase tracking-wider">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            <!-- Ejemplo de fila -->
+                            <tr class="odd:bg-gray-50 hover:bg-gray-100 transition-colors">
+                                <td class="px-6 py-4 font-medium text-gray-900 truncate">Reactivo A</td>
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center space-x-4">
+                                        <span class="font-mono truncate">2112345789</span>
+                                        <!-- Código de barras simple -->
+                                        <svg class="w-16 h-8" viewBox="0 0 80 40" fill="none">
+                                            <rect x="2" y="8" width="1" height="24" fill="black"/>
+                                            <rect x="4" y="8" width="2" height="24" fill="black"/>
+                                            <rect x="7" y="8" width="1" height="24" fill="black"/>
+                                        </svg>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <button class="text-blue-600 hover:text-blue-800 mr-4"><i class="fas fa-edit"></i></button>
+                                    <button class="text-red-600 hover:text-red-800"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
-        </main>
-    </div>
 
-    <!-- ───────────────────── Modal “Añadir material” ───────────────────── -->
-<div id="addMaterialModal"
-  class="fixed inset-0 z-50 hidden flex items-center justify-center">
-    <!-- Capa oscura (clic = cerrar modal) -->
+            <!-- Botón descargar -->
+            <div class="flex justify-end">
+                <button class="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors flex items-center">
+                    <i class="fas fa-download mr-2"></i>
+                    Descargar Excel
+                </button>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Modal Añadir material -->
+<div id="addMaterialModal" class="fixed inset-0 z-50 hidden flex items-center justify-center">
     <div id="overlay" class="absolute inset-0 bg-black/50"></div>
 
-    <!-- Ventana -->
     <div class="relative bg-lab-purple text-white rounded-lg shadow-2xl w-[90%] max-w-xl p-6 flex flex-col">
-        <!-- Botón de cerrar -->
-        <button id="closeModalBtn"
-                class="absolute top-4 right-4 text-white/80 hover:text-white text-2xl leading-none">
-            &times;
-        </button>
+        <button id="closeModalBtn" class="absolute top-4 right-4 text-white/80 hover:text-white text-2xl leading-none">&times;</button>
 
         <h3 class="text-2xl font-semibold mb-4 text-center">Añadir nuevo material</h3>
 
         <form id="materialForm" class="space-y-4">
-            <!-- ── Fila superior: foto y tipo ── -->
+            <!-- Foto y tipo -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
-                <!-- Zona de carga y vista previa -->
-                <label for="photoInput"
-                       class="group relative flex items-center justify-center
-                              bg-white/20 rounded-lg h-32 cursor-pointer overflow-hidden">
-                    <i id="photoPlaceholder"
-                       class="far fa-image text-4xl text-white/60 group-hover:text-white"></i>
-                    <img id="photoPreview" alt="preview"
-                         class="absolute inset-0 w-full h-full object-cover hidden" />
+                <label for="photoInput" class="group relative flex items-center justify-center bg-white/20 rounded-lg h-32 cursor-pointer overflow-hidden">
+                    <i id="photoPlaceholder" class="far fa-image text-4xl text-white/60 group-hover:text-white"></i>
+                    <img id="photoPreview" alt="preview" class="absolute inset-0 w-full h-full object-cover hidden" />
                     <input id="photoInput" type="file" accept="image/*" class="hidden">
-                    <span class="absolute bottom-1 right-1 text-xs bg-black/50 px-2 rounded">
-                      Cambiar foto
-                    </span>
+                    <span class="absolute bottom-1 right-1 text-xs bg-black/50 px-2 rounded">Cambiar foto</span>
                 </label>
 
-                <!-- Tipo y color -->
                 <div class="flex flex-col gap-4">
-                    <select id="tipoSelect" required
-                            class="w-full px-4 py-2 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-white">
+                    <select id="tipoSelect" required class="w-full px-4 py-2 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-white">
                         <option value="" disabled selected>Selecciona tipo</option>
                         <option value="material">Material</option>
                         <option value="reactivo">Reactivo</option>
                     </select>
 
                     <div id="colorContainer" class="hidden">
-                        <select id="colorSelect"
-                                class="w-full px-4 py-2 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-white">
+                        <select id="colorSelect" class="w-full px-4 py-2 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-white">
                             <option value="" disabled selected>Selecciona color</option>
                             <option value="rojo">Rojo</option>
                             <option value="blanco">Blanco</option>
@@ -368,45 +196,38 @@
                         </select>
                     </div>
 
-                    <textarea placeholder="Descripción"
-                              class="w-full px-4 py-2 rounded-lg text-black h-24
-                                     focus:outline-none focus:ring-2 focus:ring-white"></textarea>
+                    <textarea placeholder="Descripción" class="w-full px-4 py-2 rounded-lg text-black h-24 focus:outline-none focus:ring-2 focus:ring-white"></textarea>
                 </div>
             </div>
 
-            <!-- ── Fila inferior: otros datos ── -->
+            <!-- Otros datos -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <input type="number" placeholder="Agregar cantidad"
-                       class="w-full px-4 py-2 rounded-lg text-black
-                              focus:outline-none focus:ring-2 focus:ring-white" />
+    <input type="number" placeholder="Agregar cantidad" class="w-full px-4 py-2 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-white" />
 
-                <input type="text" placeholder="Localización"
-                       class="w-full px-4 py-2 rounded-lg text-black
-                              focus:outline-none focus:ring-2 focus:ring-white" />
+    <input type="text" placeholder="Localización" class="w-full px-4 py-2 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-white" />
 
-                <input type="text" placeholder="Capacidad"
-                       class="w-full px-4 py-2 rounded-lg text-black
-                              focus:outline-none focus:ring-2 focus:ring-white" />
+    <input type="text" placeholder="Capacidad" class="w-full px-4 py-2 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-white" />
 
-                <input type="date" placeholder="Fecha de ingreso"
-                       class="w-full px-4 py-2 rounded-lg text-black
-                              focus:outline-none focus:ring-2 focus:ring-white" />
+    <!-- Fecha de ingreso -->
+    <div class="flex flex-col">
+        <label for="fechaIngreso" class="text-white text-sm mb-1">Fecha de ingreso</label>
+        <input type="date" id="fechaIngreso" class="w-full px-4 py-2 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-white" />
+    </div>
 
-                <input type="text" placeholder="Observaciones"
-                       class="w-full px-4 py-2 rounded-lg text-black
-                              focus:outline-none focus:ring-2 focus:ring-white" />
-            </div>
+    <!-- Fecha de caducidad (solo reactivo) -->
+    <div class="flex flex-col" id="fechaCaducidadContainer" style="display:none;">
+        <label for="fechaCaducidad" class="text-white text-sm mb-1">Fecha de caducidad</label>
+        <input type="date" id="fechaCaducidad" class="w-full px-4 py-2 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-white" />
+    </div>
+
+    <input type="text" placeholder="Observaciones" class="w-full px-4 py-2 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-white" />
+</div>
+
 
             <!-- Botones -->
             <div class="mt-4 flex flex-col sm:flex-row sm:justify-end gap-4">
-                <button type="button" id="cancelModalBtn"
-                        class="px-6 py-3 bg-yellow-400/90 hover:bg-yellow-400 text-black rounded-lg">
-                    Cancelar
-                </button>
-                <button type="submit"
-                        class="px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg">
-                    Agregar
-                </button>
+                <button type="button" id="cancelModalBtn" class="px-6 py-3 bg-yellow-400/90 hover:bg-yellow-400 text-black rounded-lg">Cancelar</button>
+                <button type="submit" class="px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg">Agregar</button>
             </div>
         </form>
     </div>
@@ -414,7 +235,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // Vista previa de la foto
+    // Vista previa de foto
     const fileInput   = document.getElementById('photoInput');
     const imgPreview  = document.getElementById('photoPreview');
     const placeholder = document.getElementById('photoPlaceholder');
@@ -422,73 +243,52 @@ document.addEventListener('DOMContentLoaded', () => {
     fileInput.addEventListener('change', e => {
         const file = e.target.files[0];
         if (!file) return;
-
         imgPreview.src = URL.createObjectURL(file);
         imgPreview.classList.remove('hidden');
         placeholder.classList.add('hidden');
     });
 
-    // Mostrar/ocultar select de color si es reactivo
+    // Modal
+    const openBtn   = document.getElementById('openModalBtn');
+    const modal     = document.getElementById('addMaterialModal');
+    const overlay   = document.getElementById('overlay');
+    const closeBtns = [document.getElementById('closeModalBtn'), document.getElementById('cancelModalBtn'), overlay];
+    const toggleModal = () => modal.classList.toggle('hidden');
+    openBtn.addEventListener('click', toggleModal);
+    closeBtns.forEach(btn => btn.addEventListener('click', toggleModal));
+
+    // Mostrar select de color y fecha de caducidad solo si es reactivo
     const tipoSelect     = document.getElementById('tipoSelect');
     const colorContainer = document.getElementById('colorContainer');
     const colorSelect    = document.getElementById('colorSelect');
+    const fechaCaducidad = document.getElementById('fechaCaducidad');
 
     tipoSelect.addEventListener('change', () => {
-        if (tipoSelect.value === 'reactivo') {
-            colorContainer.classList.remove('hidden');
-            colorSelect.required = true;
-        } else {
-            colorContainer.classList.add('hidden');
-            colorSelect.required = false;
-        }
+    if(tipoSelect.value === 'reactivo'){
+        colorContainer.classList.remove('hidden');
+        document.getElementById('fechaCaducidadContainer').style.display = 'flex';
+        colorSelect.setAttribute('required','true');
+        fechaCaducidad.setAttribute('required','true');
+    } else {
+        colorContainer.classList.add('hidden');
+        document.getElementById('fechaCaducidadContainer').style.display = 'none';
+        colorSelect.removeAttribute('required');
+        fechaCaducidad.removeAttribute('required');
+    }
+});
+
+
+    // Búsqueda en tabla
+    const searchInput = document.querySelector('input[placeholder="Buscar producto"]');
+    const tableRows   = document.querySelectorAll('tbody tr');
+    searchInput.addEventListener('input', function () {
+        const term = this.value.toLowerCase();
+        tableRows.forEach(row => {
+            const name = row.querySelector('td').textContent.toLowerCase();
+            row.style.display = name.includes(term) ? '' : 'none';
+        });
     });
 });
 </script>
-
-
-    <!-- ───────────────────── JS ───────────────────── -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            /* ── Búsqueda en tabla ── */
-            const searchInput = document.querySelector('input[placeholder="Buscar producto"]');
-            const tableRows   = document.querySelectorAll('tbody tr');
-            searchInput.addEventListener('input', function () {
-                const term = this.value.toLowerCase();
-                tableRows.forEach(row => {
-                    const name = row.querySelector('td').textContent.toLowerCase();
-                    row.style.display = name.includes(term) ? '' : 'none';
-                });
-            });
-
-            /* ── Modal ── */
-            const openBtn   = document.getElementById('openModalBtn');
-            const modal     = document.getElementById('addMaterialModal');
-            const overlay   = document.getElementById('overlay');
-            const closeBtns = [
-                document.getElementById('closeModalBtn'),
-                document.getElementById('cancelModalBtn'),
-                overlay
-            ];
-
-            const toggleModal = () => modal.classList.toggle('hidden');
-
-            openBtn.addEventListener('click', toggleModal);
-            closeBtns.forEach(btn => btn.addEventListener('click', toggleModal));
-
-            /* ── Vista previa de la foto ── */
-            const fileInput   = document.getElementById('photoInput');
-            const imgPreview  = document.getElementById('photoPreview');
-            const placeholder = document.getElementById('photoPlaceholder');
-
-            fileInput.addEventListener('change', e => {
-                const file = e.target.files[0];
-                if (!file) return;
-
-                imgPreview.src = URL.createObjectURL(file);
-                imgPreview.classList.remove('hidden');
-                placeholder.classList.add('hidden');
-            });
-        });
-    </script>
 </body>
 </html>
