@@ -29,10 +29,17 @@
     <header class="bg-[#852747] text-white px-6 py-4 flex justify-between items-center fixed top-0 left-0 w-full z-50">
         <h2 class="text-xl font-semibold">Inicio</h2>
         <div class="flex items-center space-x-4">
-            <span class="text-sm">Nombre de usuario</span>
+            <span class="text-sm">{{ usuario }}</span>
             <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center">
                 <i class="fas fa-user text-[#852747]"></i>
             </div>
+            <!-- Botón de cerrar sesión -->
+    <a href="{{ url_for('logout') }}"
+   class="bg-white text-black px-3 py-1 rounded-full flex items-center space-x-2 hover:bg-gray-200 transition">
+  <i class="fas fa-sign-out-alt text-lab-purple"></i>
+  <span class="text-sm font-medium">Cerrar sesión</span>
+</a>
+
         </div>
     </header>
 
@@ -61,7 +68,7 @@
         <div class="relative z-10 grid grid-cols-2 gap-40 p-24">
 
             <!-- Botón Almacén -->
-            <a href="{{ url_for('inventory') }}" class="flex flex-col items-center bg-[#852747] text-white rounded-3xl px-20 py-12 shadow-lg hover:scale-105 transition-transform">
+            <a href="{{ url_for('almacen_view') }}" class="flex flex-col items-center bg-[#852747] text-white rounded-3xl px-20 py-12 shadow-lg hover:scale-105 transition-transform">
                 <img src="{{ url_for('static', filename='almacen.png') }}" alt="Almacén" class="w-20 h-20 mb-2">
                 <span class="text-xl font-semibold">Almacén</span>
             </a>
