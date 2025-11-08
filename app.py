@@ -207,6 +207,22 @@ def agregar_material():
 
     return jsonify({'ok': True})
 
+@app.route('/inventario/eliminar/<codigo_barras>', methods=['DELETE'])
+@login_required
+def eliminar_producto(codigo_barras):
+    try:
+        print(f"🗑️ Intentando eliminar producto con código: {codigo_barras}")
+        cur = mysql.connection.cursor()
+        cur.execute("DELETE FROM inventario WHERE codigo_barras = %s", (codigo_barras,))
+        mysql.connection.commit()
+        cur.close()
+        print("✅ Producto eliminado de la base de datos.")
+        return jsonify({'ok': True, 'mensaje': 'Producto eliminado correctamente'})
+    except Exception as e:
+        print("❌ Error al eliminar:", e)
+        return jsonify({'ok': False, 'error': str(e)})
+
+
 
 # ===============================
 # 🔹 Citas

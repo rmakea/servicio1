@@ -115,9 +115,10 @@
                         <td class="px-6 py-4 font-mono truncate">{{ p.codigo_barras }}</td>
                         <td class="px-6 py-4">{{ p.tipo }}{% if p.color %} / {{ p.color }}{% endif %}</td>
                         <td class="px-6 py-4 text-center">
-                            <button class="text-red-600 hover:text-red-800 eliminar-btn" data-id="{{ p.codigo_barras }}">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                            <button class="text-red-600 hover:text-red-800 eliminar-btn" data-codigo="{{ p.codigo_barras }}">
+    <i class="fas fa-trash"></i>
+</button>
+
                         </td>
                     </tr>
                     {% endfor %}
@@ -387,18 +388,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // Eliminar producto (delegación)
-    tbody.addEventListener('click', e => {
-        const btn = e.target.closest('.eliminar-btn');
-        if (!btn) return;
-        const codigo = btn.dataset.codigo;
-        const fila = btn.closest('tr');
-        if (confirm('¿Seguro que deseas eliminar este producto?')) {
-            eliminarLocal(codigo);
-            fila.remove();
-            totalProductos.textContent = tbody.children.length;
-            mostrarNotificacion('Producto eliminado correctamente', 'red');
+    tbody.addEventListener('click', async e => {
+    const btn = e.target.closest('.eliminar-btn');
+    if (!btn) return;
+
+    const codigo = btn.dataset.codigo; // 👈 Asegúrate que sea "codigo"
+    if (!codigo) {
+        console.error("No se encontró el código de barras en el botón.");
+        return;
+    }
+
+    const fila = btn.closest('tr');
+    if (confirm('¿Seguro que deseas eliminar este producto?')) {
+        try {
+            const response = await fetch(`/inventario/eliminar/${codigo}`, { method: 'DELETE' });
+            const data = await response.json();
+
+            if (data.ok) {
+                fila.remove();
+                mostrarNotificacion('Producto eliminado correctamente', 'red');
+                totalProductos.textContent = tbody.children.length;
+            } else {
+                mostrarNotificacion('❌ Error al eliminar: ' + data.error, 'red');
+            }
+        } catch (error) {
+            console.error('Error de conexión:', error);
+            mostrarNotificacion('⚠️ Error de conexión con el servidor', 'red');
         }
-    });
+    }
+});
+
 
     // Búsqueda por nombre o código (compatible con scanner USB que escribe en el input)
     searchInput && searchInput.addEventListener('input', () => {
