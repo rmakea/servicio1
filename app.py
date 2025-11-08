@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from werkzeug.security import check_password_hash, generate_password_hash
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask_mysqldb import MySQL
 
 app = Flask(__name__)
@@ -72,65 +72,67 @@ def logout():
 # ===============================
 # 🔹 Dashboard
 # ===============================
-@app.route('/inicio')
+from datetime import datetime, timedelta
+# ===============================
+# 🔹 Dashboard
+# ===============================
+@app.route('/dashboard')
 @login_required
 def dashboard():
-    return render_template('dashboard.html', usuario=session['user_id'])
+    return render_template('dashboard.html', usuario=session.get('user_id'))
 
 # ===============================
-# 🔹 Inventario
+# 🔹 Funciones para obtener materiales y reactivos
 # ===============================
+def obtener_materiales_desde_bd():
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM inventario WHERE tipo = 'Material'")
+    materiales = cur.fetchall()
+    cur.close()
+    return materiales
+
+def obtener_reactivos_desde_bd():
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM inventario WHERE tipo = 'Reactivo'")
+    reactivos = cur.fetchall()
+    cur.close()
+    return reactivos
+
+
 @app.route('/inventario')
 @login_required
 def inventario_view():
-    cur = mysql.connection.cursor()
+    materiales = obtener_materiales_desde_bd()
+    reactivos = obtener_reactivos_desde_bd()
 
-    # 🔹 Actualiza los estados automáticamente (ahora insensible a mayúsculas/minúsculas)
-    cur.execute("""
-    UPDATE inventario
-    SET estado = CASE
-        WHEN tipo = 'reactivo' 
-             AND fecha_caducidad <= CURDATE() + INTERVAL 7 DAY 
-             AND cantidad_disponible <= 5 THEN 'proximo_caducar_y_stock_bajo'
-        WHEN tipo = 'reactivo' 
-             AND fecha_caducidad <= CURDATE() + INTERVAL 7 DAY THEN 'proximo_caducar'
-        WHEN cantidad_disponible <= 5 THEN 'stock_bajo'
-        ELSE 'ok'
-    END
-""")
+    hoy = datetime.now().date()
+    limite_caducidad = hoy + timedelta(days=7)
 
-    mysql.connection.commit()
+    # 🔹 Filtrar materiales con stock bajo y caducidad próxima
+    stock_bajo_materiales = [m for m in materiales if m['cantidad'] <= 5]
+    caducidad_proxima_materiales = [
+        m for m in materiales
+        if m.get('fecha_caducidad') and m['fecha_caducidad'] <= limite_caducidad
+    ]
 
-    # 🔹 Obtiene todos los registros
-    cur.execute("SELECT * FROM inventario")
-    inventario_db = cur.fetchall()
+    # 🔹 Filtrar reactivos con stock bajo y caducidad próxima
+    stock_bajo_reactivos = [r for r in reactivos if r['cantidad'] <= 5]
+    caducidad_proxima_reactivos = [
+        r for r in reactivos
+        if r.get('fecha_caducidad') and r['fecha_caducidad'] <= limite_caducidad
+    ]
 
-    # 🔹 Filtra por tipo
-    materiales = [item for item in inventario_db if item['tipo'].lower() == 'material']
-    reactivos = [item for item in inventario_db if item['tipo'].lower() == 'reactivo']
-
-    # 🔹 Reactivos próximos a caducar (7 días o menos)
-    cur.execute("""
-        SELECT nombre, fecha_caducidad
-        FROM inventario
-        WHERE LOWER(tipo) = 'reactivo' AND fecha_caducidad IS NOT NULL AND fecha_caducidad <= CURDATE() + INTERVAL 7 DAY
-    """)
-    proximos_caducar = cur.fetchall()
-    
-    proximos_caducar = list(proximos_caducar)
-
-    cur.close()
-    
-    print("🧪 Reactivos próximos a caducar:", proximos_caducar)
-
-    # 🔹 Enviar datos al template
     return render_template(
         'inventario.html',
         materiales=materiales,
         reactivos=reactivos,
-        proximos_caducar=proximos_caducar,
-        usuario=session['user_id']
+        stock_bajo_materiales=stock_bajo_materiales,
+        caducidad_proxima_materiales=caducidad_proxima_materiales,
+        stock_bajo_reactivos=stock_bajo_reactivos,
+        caducidad_proxima_reactivos=caducidad_proxima_reactivos
     )
+
+
 
 @app.route('/inventario/buscar')
 @login_required
@@ -157,10 +159,10 @@ def buscar_producto():
 def almacen_view():
     cur = mysql.connection.cursor()
     cur.execute("SELECT nombre, codigo_barras, tipo, color FROM inventario")
-    almacen_db = cur.fetchall()
+    productos = cur.fetchall()
     cur.close()
+    return render_template('almacen.html', productos=productos, usuario=session['user_id'])
 
-    return render_template('almacen.html', productos=almacen_db, usuario=session['user_id'])
 
 @app.route('/almacen/listar')
 def listar_materiales():
@@ -171,19 +173,40 @@ def listar_materiales():
     return jsonify(materiales)
 
 @app.route('/almacen/agregar', methods=['POST'])
+@login_required
 def agregar_material():
     data = request.get_json()
+
+    nombre = data.get('nombre')
+    tipo = data.get('tipo')
+    color = data.get('color')
+    cantidad = data.get('cantidad')
+    localizacion = data.get('localizacion')
+    capacidad = data.get('capacidad')
+    fecha_ingreso = data.get('fecha_ingreso')
+    fecha_caducidad = data.get('fecha_caducidad')
+    observaciones = data.get('observaciones')
+
+    # Genera código de barras automático
+    codigo_barras = f"MT{int(datetime.now().timestamp())}"
+
     cur = mysql.connection.cursor()
     cur.execute("""
-        INSERT INTO materiales (nombre, tipo, color, codigo, cantidad, localizacion, capacidad, fecha_ingreso, fecha_caducidad, observaciones)
-        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        INSERT INTO inventario 
+        (nombre, tipo, color, codigo_barras, cantidad, cantidad_buen_estado, cantidad_disponible, cantidad_danada, 
+         localizacion, capacidad, fecha_ingreso, fecha_caducidad, observaciones)
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
     """, (
-        data['nombre'], data['tipo'], data['color'], data['codigo'], data['cantidad'],
-        data['localizacion'], data['capacidad'], data['fechaIngreso'], data['fechaCaducidad'], data['observaciones']
+        nombre, tipo, color, codigo_barras, cantidad,
+        cantidad, cantidad, 0, localizacion, capacidad,
+        fecha_ingreso, fecha_caducidad, observaciones
     ))
+
     mysql.connection.commit()
     cur.close()
-    return jsonify({"mensaje": "Producto agregado correctamente"})
+
+    return jsonify({'ok': True})
+
 
 # ===============================
 # 🔹 Citas

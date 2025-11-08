@@ -42,7 +42,7 @@
         </div>
         <nav class="mt-6">
             <div class="px-4 space-y-2">
-                <a href="/inicio" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                <a href="/dashboard" class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
                     <i class="fas fa-home"></i><span>Inicio</span>
                 </a>
                 <a href="/almacen" class="flex items-center space-x-3 px-4 py-3 bg-lab-purple text-white rounded-lg">
@@ -83,6 +83,9 @@
                 <button id="openModalBtn" class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center">
                     <i class="fas fa-plus mr-2"></i>Añadir nuevo material
                 </button>
+                <button id="downloadExcelBtn" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2">
+                    <i class="fas fa-file-excel"></i> Descargar Excel
+                </button>
             </div>
 
             <!-- Total productos -->
@@ -91,29 +94,39 @@
                 <p class="text-2xl font-bold text-gray-800" id="totalProductos">0</p>
             </div>
 
-            <!-- Tabla -->
-            <div class="bg-white rounded-lg shadow-lg mb-8">
+           <!-- Tabla con scroll interno -->
+<div class="bg-white rounded-lg shadow-lg mb-8">
                 <div class="w-full overflow-x-auto">
-                    <table class="table-fixed w-full text-sm">
-                        <thead class="bg-lab-table text-black sticky top-0 z-10">
-                            <tr>
-                                <th class="px-6 py-3 text-left font-semibold uppercase tracking-wider">Producto</th>
-                                <th class="px-6 py-3 text-left font-semibold uppercase tracking-wider">Código de Barras</th>
-                                <th class="px-6 py-3 text-left font-semibold uppercase tracking-wider">Tipo / Color</th>
-                                <th class="px-6 py-3 text-left font-semibold uppercase tracking-wider">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200"></tbody>
-                    </table>
-                </div>
-            </div>
+        <!-- Contenedor con altura fija y scroll vertical -->
+        <div class="max-h-[450px] overflow-y-auto">
+            <table class="table-fixed w-full text-sm">
+                <thead class="bg-lab-table text-black sticky top-0 z-10">
+                    <tr>
+                        <th class="px-6 py-3 text-left font-semibold uppercase tracking-wider">Producto</th>
+                        <th class="px-6 py-3 text-left font-semibold uppercase tracking-wider">Código de Barras</th>
+                        <th class="px-6 py-3 text-left font-semibold uppercase tracking-wider">Tipo / Color</th>
+                        <th class="px-6 py-3 text-left font-semibold uppercase tracking-wider">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for p in productos %}
+                    <tr class="odd:bg-gray-50 hover:bg-gray-100 transition-colors">
+                        <td class="px-6 py-4 font-medium text-gray-900 truncate">{{ p.nombre }}</td>
+                        <td class="px-6 py-4 font-mono truncate">{{ p.codigo_barras }}</td>
+                        <td class="px-6 py-4">{{ p.tipo }}{% if p.color %} / {{ p.color }}{% endif %}</td>
+                        <td class="px-6 py-4 text-center">
+                            <button class="text-red-600 hover:text-red-800 eliminar-btn" data-id="{{ p.codigo_barras }}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-            <!-- 📥 Botón de descarga Excel -->
-            <div class="flex justify-center">
-                <button id="downloadExcelBtn" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2">
-                    <i class="fas fa-file-excel"></i> Descargar Excel
-                </button>
-            </div>
+            
         </div>
        <!-- 🔽 MODAL PARA AÑADIR NUEVO MATERIAL 🔽 -->
 <div id="addMaterialModal" class="fixed inset-0 z-50 hidden flex items-center justify-center">
@@ -334,32 +347,44 @@ document.addEventListener('DOMContentLoaded', () => {
         totalProductos.textContent = 0;
     };
 
-    const cargarLocal = () => {
-        limpiarTabla();
-        const productos = obtenerProductosLocal();
-        productos.forEach(p => agregarFilaTabla(p));
+    
+
+    form && form.addEventListener('submit', async e => {
+    e.preventDefault();
+
+    const producto = {
+        nombre: nombreInput.value.trim(),
+        tipo: tipoSelect.value,
+        color: colorSelect.value || null,
+        cantidad: cantidadInput.value,
+        localizacion: localizacionInput.value,
+        capacidad: capacidadInput.value,
+        fecha_ingreso: fechaIngreso.value,
+        fecha_caducidad: fechaCaducidad.value || null,
+        observaciones: observacionesInput.value
     };
 
-    // Envío del formulario: agrega producto (recupera funcionalidad "Agregar nuevo material")
-    form && form.addEventListener('submit', e => {
-        e.preventDefault();
-        const producto = {
-            nombre: nombreInput.value.trim() || '(Sin nombre)',
-            tipo: tipoSelect.value || '',
-            color: colorSelect.value || '',
-            codigo: generarCodigoBarras(),
-            cantidad: cantidadInput.value || '',
-            localizacion: localizacionInput.value || '',
-            capacidad: capacidadInput.value || '',
-            fechaIngreso: fechaIngreso.value || '',
-            fechaCaducidad: fechaCaducidad.value || '',
-            observaciones: observacionesInput.value || ''
-        };
-        agregarFilaTabla(producto);
-        guardarLocal(producto);
-        toggleModal(false);
-        mostrarNotificacion('Producto agregado correctamente', 'green');
-    });
+    try {
+        const response = await fetch('/almacen/agregar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(producto)
+        });
+
+        const data = await response.json();
+        if (data.ok) {
+            mostrarNotificacion('✅ Producto agregado correctamente');
+            toggleModal(false);
+            location.reload(); // recarga para mostrar la nueva fila
+        } else {
+            mostrarNotificacion('❌ Error al agregar el producto', 'red');
+        }
+    } catch (error) {
+        console.error(error);
+        mostrarNotificacion('⚠️ Error de conexión con el servidor', 'red');
+    }
+});
+
 
     // Eliminar producto (delegación)
     tbody.addEventListener('click', e => {
@@ -417,6 +442,11 @@ document.addEventListener('DOMContentLoaded', () => {
     cargarLocal();
 
     // --- fin DOMContentLoaded ---
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  const totalProductos = document.getElementById('totalProductos');
+  totalProductos.textContent = document.querySelectorAll('tbody tr').length;
 });
 </script>
 

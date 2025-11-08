@@ -41,7 +41,7 @@
         <nav class="mt-6">
           <div class="px-4 space-y-2">
             <a
-              href="/inicio"
+              href="/dashboard"
               class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <i class="fas fa-home"></i><span>Inicio</span>
@@ -134,14 +134,6 @@
                   Reactivos
                 </button>
               </div>
-
-              <!-- 🔹 Contador de próximos a caducar (solo visible en vista de reactivos) -->
-  <div id="contador-caducidad" 
-       class="alert alert-warning d-none mb-0" 
-       role="alert" 
-       style="cursor: pointer;">
-    <strong id="contador-texto">0 reactivo(s) próximo(s) a caducar</strong>
-  </div>
             </div>
           </div>
 
@@ -169,6 +161,66 @@
               Rojo
             </button>
           </div>
+
+          {% if stock_bajo_materiales or caducidad_proxima_materiales or stock_bajo_reactivos or caducidad_proxima_reactivos %}
+<div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-4 rounded shadow">
+
+  <p class="font-bold text-yellow-800 mb-2">⚠️ Alertas de inventario</p>
+
+  <!-- 🔹 MATERIALES -->
+  {% if stock_bajo_materiales or caducidad_proxima_materiales %}
+  <div class="mb-3">
+    <p class="font-semibold text-yellow-700">🧪 Materiales:</p>
+
+    {% if stock_bajo_materiales %}
+    <ul class="list-disc ml-6 text-yellow-900 mb-2">
+      <li class="font-semibold">Stock bajo:</li>
+      {% for item in stock_bajo_materiales %}
+        <li>{{ item.nombre }} — Stock actual: {{ item.cantidad }} (mínimo: {{ item.minimo }})</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if caducidad_proxima_materiales %}
+    <ul class="list-disc ml-6 text-orange-800">
+      <li class="font-semibold">Próximos a caducar:</li>
+      {% for item in caducidad_proxima_materiales %}
+        <li>{{ item.nombre }} ({{ item.fecha_caducidad }})</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- 🔹 REACTIVOS -->
+  {% if stock_bajo_reactivos or caducidad_proxima_reactivos %}
+  <div>
+    <p class="font-semibold text-yellow-700">⚗️ Reactivos:</p>
+
+    {% if stock_bajo_reactivos %}
+    <ul class="list-disc ml-6 text-yellow-900 mb-2">
+      <li class="font-semibold">Stock bajo:</li>
+      {% for item in stock_bajo_reactivos %}
+        <li>{{ item.nombre }} — Stock actual: {{ item.cantidad }} (mínimo: {{ item.minimo }})</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if caducidad_proxima_reactivos %}
+    <ul class="list-disc ml-6 text-orange-800">
+      <li class="font-semibold">Próximos a caducar:</li>
+      {% for item in caducidad_proxima_reactivos %}
+        <li>{{ item.nombre }} ({{ item.fecha_caducidad }})</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+  {% endif %}
+
+</div>
+{% endif %}
+
+
 
           <!-- Tabla de Materiales -->
 <div id="tablaMateriales" class="bg-white rounded-lg shadow overflow-hidden mt-4">
@@ -207,18 +259,6 @@
     </div>
 </div>
 
-<!-- 🔹 Lista de reactivos próximos a caducar -->
-<div id="listaCaducidad" class="hidden bg-white rounded-lg shadow p-4 border border-gray-200 mb-4">
-  <ul class="list-disc pl-6">
-    {% for r in proximos_caducar %}
-    <li class="text-gray-700">
-      <strong>{{ r.nombre }}</strong> — caduca el {{ r.fecha_caducidad }}
-    </li>
-    {% else %}
-    <li class="text-gray-500 italic">No hay reactivos próximos a caducar.</li>
-    {% endfor %}
-  </ul>
-</div>
 
 
 <!-- Tabla de Reactivos -->
@@ -278,24 +318,12 @@
   const tablaMateriales = document.getElementById("tablaMateriales");
   const tablaReactivos = document.getElementById("tablaReactivos");
   const colorButtons = document.getElementById("colorButtons");
-  const contador = document.getElementById("contador-caducidad");
-  const contadorTexto = document.getElementById("contador-texto");
-
-  // 🔹 Datos generados desde Flask
-  // 🔹 Datos generados desde Flask (directamente desde la consulta SQL)
-const proximos = {{ proximos_caducar|length }};
-const listaCaducan = {{ proximos_caducar|map(attribute='nombre')|list|tojson }};
-
-
-  // Mostrar cantidad de reactivos próximos a caducar
-  contadorTexto.innerText = `${proximos} reactivo(s) próximo(s) a caducar`;
 
   // 🔹 Alternar entre Materiales y Reactivos
   btnMateriales.addEventListener("click", () => {
     tablaMateriales.classList.remove("hidden");
     tablaReactivos.classList.add("hidden");
     colorButtons.classList.add("hidden");
-    contador.classList.add("hidden"); // Ocultar contador
 
     btnMateriales.classList.add("bg-lab-purple", "text-white");
     btnMateriales.classList.remove("bg-gray-200", "text-gray-700");
@@ -307,7 +335,6 @@ const listaCaducan = {{ proximos_caducar|map(attribute='nombre')|list|tojson }};
     tablaReactivos.classList.remove("hidden");
     tablaMateriales.classList.add("hidden");
     colorButtons.classList.remove("hidden");
-    contador.classList.remove("hidden"); // Mostrar contador
 
     btnReactivos.classList.add("bg-lab-purple", "text-white");
     btnReactivos.classList.remove("bg-gray-200", "text-gray-700");
@@ -315,14 +342,6 @@ const listaCaducan = {{ proximos_caducar|map(attribute='nombre')|list|tojson }};
     btnMateriales.classList.remove("bg-lab-purple", "text-white");
   });
 
-  // 🔹 Mostrar alerta con la lista al hacer clic en el contador
-  contador.addEventListener("click", () => {
-    if (proximos > 0) {
-      alert("Reactivos próximos a caducar:\n\n" + listaCaducan.join("\n"));
-    } else {
-      alert("No hay reactivos próximos a caducar 😊");
-    }
-  });
 
   // 🔹 Filtro por color (para reactivos)
   const colorButtonsContainer = document.getElementById("colorButtons");
