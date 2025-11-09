@@ -191,9 +191,23 @@
                     <td class="px-6 py-4 text-sm text-gray-900">{{ m.fecha_ingreso }}</td>
                     <td class="px-6 py-4 text-sm text-gray-900">{{ m.observaciones }}</td>
                     <td class="px-6 py-4 text-sm text-gray-500">
-                        <button class="text-blue-600 hover:text-blue-900 mr-3"><i class="fas fa-edit"></i></button>
-                        <button class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
-                    </td>
+    <button 
+  class="text-blue-600 hover:text-blue-900 mr-3 btn-editar"
+  data-tipo="material"
+  data-codigo="{{ m.codigo_barras }}"
+  data-nombre="{{ m.nombre }}"
+  data-cantidad="{{ m.cantidad }}"
+  data-cantidad_disponible="{{ m.cantidad_disponible }}"
+  data-localizacion="{{ m.localizacion }}"
+  data-capacidad="{{ m.capacidad }}"
+  data-fecha_ingreso="{{ m.fecha_ingreso }}"
+  data-observaciones="{{ m.observaciones }}">
+  <i class="fas fa-edit"></i>
+</button>
+
+
+</td>
+
                 </tr>
                 {% endfor %}
             </tbody>
@@ -236,6 +250,26 @@
       <td class="px-6 py-4 text-sm text-gray-500">{{ r.capacidad }}</td>
       <td class="px-6 py-4 text-sm text-gray-500">{{ r.fecha_ingreso }}</td>
       <td class="px-6 py-4 text-sm text-gray-500">{{ r.fecha_caducidad }}</td>
+      <td class="px-6 py-4 text-sm text-gray-500">
+    <button 
+  class="text-blue-600 hover:text-blue-900 mr-3 btn-editar"
+  data-tipo="reactivo"
+  data-codigo="{{ r.codigo_barras }}"
+  data-nombre="{{ r.nombre }}"
+  data-color="{{ r.color }}"
+  data-cantidad="{{ r.cantidad }}"
+  data-cantidad_buen_estado="{{ r.cantidad_buen_estado }}"
+  data-cantidad_disponible="{{ r.cantidad_disponible }}"
+  data-localizacion="{{ r.localizacion }}"
+  data-capacidad="{{ r.capacidad }}"
+  data-fecha_ingreso="{{ r.fecha_ingreso }}"
+  data-fecha_caducidad="{{ r.fecha_caducidad }}">
+  <i class="fas fa-edit"></i>
+</button>
+
+
+</td>
+
   </tr>
   {% endfor %}
 </tbody>
@@ -329,6 +363,175 @@
   </div>
 </div>
 
+<!-- Modal para editar producto -->
+<div id="modalEditar" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+  <div class="bg-white rounded-xl shadow-xl w-[90%] max-w-[600px] max-h-[90vh] overflow-y-auto p-6">
+    <h2 class="text-2xl font-bold mb-4 text-lab-purple text-center">✏️ Editar producto</h2>
+
+    <form id="formEditar" class="space-y-3">
+      <input type="hidden" id="editTipo" />
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Código de barras</label>
+        <input type="text" id="editCodigo" class="w-full border px-3 py-2 rounded bg-gray-100" readonly />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Nombre</label>
+        <input type="text" id="editNombre" class="w-full border px-3 py-2 rounded" />
+      </div>
+
+      <!-- Solo Reactivos -->
+      <div id="campoColor" class="hidden">
+        <label for="editColor" class="block text-sm font-medium text-gray-700 mb-1">Color</label>
+<select id="editColor" name="color" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-lab-purple focus:border-lab-purple">
+  <option value="" disabled selected>Selecciona un color</option>
+  <option value="verde">Verde</option>
+  <option value="café">Café</option>
+  <option value="azul">Azul</option>
+  <option value="amarillo">Amarillo</option>
+  <option value="blanco">Blanco</option>
+  <option value="rojo">Rojo</option>
+</select>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Cantidad total</label>
+        <input type="number" id="editCantidad" class="w-full border px-3 py-2 rounded" />
+      </div>
+
+      <!-- Solo Reactivos -->
+      <div id="campoBuenEstado" class="hidden">
+        <label class="block text-sm font-medium text-gray-700">Cantidad en buen estado</label>
+        <input type="number" id="editCantidadBuenEstado" class="w-full border px-3 py-2 rounded" />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Cantidad disponible</label>
+        <input type="number" id="editCantidadDisponible" class="w-full border px-3 py-2 rounded" />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Localización</label>
+        <input type="text" id="editLocalizacion" class="w-full border px-3 py-2 rounded" />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Capacidad</label>
+        <input type="text" id="editCapacidad" class="w-full border px-3 py-2 rounded" />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Fecha de ingreso</label>
+        <input type="date" id="editFechaIngreso" class="w-full border px-3 py-2 rounded" />
+      </div>
+
+      <!-- Solo Reactivos -->
+      <div id="campoCaducidad" class="hidden">
+        <label class="block text-sm font-medium text-gray-700">Fecha de caducidad</label>
+        <input type="date" id="editFechaCaducidad" class="w-full border px-3 py-2 rounded" />
+      </div>
+
+      <div id="campoObservaciones">
+        <label class="block text-sm font-medium text-gray-700">Observaciones</label>
+        <textarea id="editObservaciones" class="w-full border px-3 py-2 rounded"></textarea>
+      </div>
+
+      <div class="flex justify-end space-x-3 mt-6 sticky bottom-0 bg-white py-2 border-t border-gray-200">
+        <button type="button" id="cancelarEditar" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancelar</button>
+        <button type="submit" class="px-4 py-2 bg-lab-purple text-white rounded hover:bg-lab-purple-dark">Guardar cambios</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<script>
+  const modalEditar = document.getElementById('modalEditar');
+  const formEditar = document.getElementById('formEditar');
+  const cancelarEditar = document.getElementById('cancelarEditar');
+
+  // Mostrar el modal con los datos correctos
+  document.querySelectorAll('.btn-editar').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tipo = btn.dataset.tipo;
+      document.getElementById('editTipo').value = tipo;
+
+      // Campos visibles solo para reactivos
+      const isReactivo = tipo === "reactivo";
+      document.getElementById('campoColor').classList.toggle('hidden', !isReactivo);
+      document.getElementById('campoBuenEstado').classList.toggle('hidden', !isReactivo);
+      document.getElementById('campoCaducidad').classList.toggle('hidden', !isReactivo);
+
+      // Cargar datos generales
+      document.getElementById('editCodigo').value = btn.dataset.codigo;
+      document.getElementById('editNombre').value = btn.dataset.nombre;
+      document.getElementById('editCantidad').value = btn.dataset.cantidad || '';
+      document.getElementById('editCantidadDisponible').value = btn.dataset.cantidad_disponible || '';
+      document.getElementById('editLocalizacion').value = btn.dataset.localizacion || '';
+      document.getElementById('editCapacidad').value = btn.dataset.capacidad || '';
+      document.getElementById('editFechaIngreso').value = btn.dataset.fecha_ingreso || '';
+      document.getElementById('editObservaciones').value = btn.dataset.observaciones || '';
+
+      // Datos específicos de reactivos
+      if (isReactivo) {
+        document.getElementById('editColor').value = btn.dataset.color || '';
+        document.getElementById('editCantidadBuenEstado').value = btn.dataset.cantidad_buen_estado || '';
+        document.getElementById('editFechaCaducidad').value = btn.dataset.fecha_caducidad || '';
+      }
+
+      modalEditar.classList.remove('hidden');
+    });
+  });
+
+  // Cerrar modal
+  cancelarEditar.addEventListener('click', () => {
+    modalEditar.classList.add('hidden');
+  });
+
+  // Guardar cambios
+  formEditar.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const tipo = document.getElementById('editTipo').value;
+
+    const data = {
+      tipo: tipo,
+      codigo_barras: document.getElementById('editCodigo').value,
+      nombre: document.getElementById('editNombre').value,
+      cantidad: document.getElementById('editCantidad').value,
+      cantidad_disponible: document.getElementById('editCantidadDisponible').value,
+      localizacion: document.getElementById('editLocalizacion').value,
+      capacidad: document.getElementById('editCapacidad').value,
+      fecha_ingreso: document.getElementById('editFechaIngreso').value,
+      observaciones: document.getElementById('editObservaciones').value
+    };
+
+    if (tipo === "reactivo") {
+      data.color = document.getElementById('editColor').value;
+      data.cantidad_buen_estado = document.getElementById('editCantidadBuenEstado').value;
+      data.fecha_caducidad = document.getElementById('editFechaCaducidad').value;
+    }
+
+    const resp = await fetch('/actualizar_inventario', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+
+    const result = await resp.json();
+    if (result.success) {
+      alert('✅ Producto actualizado correctamente.');
+      modalEditar.classList.add('hidden');
+      location.reload();
+    } else {
+      alert('⚠️ Error al actualizar el producto.');
+    }
+  });
+</script>
+
+
+
 
 <script>
   const btnMateriales = document.getElementById("btnMateriales");
@@ -395,19 +598,6 @@
     });
   });
 
-  // 🔹 Editar y Eliminar (demo)
-  document.querySelectorAll(".fa-edit").forEach((button) => {
-    button.addEventListener("click", () => {
-      alert("Editar producto - Funcionalidad por implementar");
-    });
-  });
-  document.querySelectorAll(".fa-trash").forEach((button) => {
-    button.addEventListener("click", function () {
-      if (confirm("¿Estás seguro de eliminar este producto?")) {
-        this.closest("tr").remove();
-      }
-    });
-  });
 
   const btnAlertas = document.getElementById('btnAlertas');
   const modalAlertas = document.getElementById('modalAlertas');
@@ -427,6 +617,18 @@
       modalAlertas.classList.add('hidden');
     }
   });
+
+fetch('/guardar_producto', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(data)
+})
+  .then(res => res.json())
+  .then(response => {
+    alert(response.message);
+    location.reload();
+  });
+
 </script>
 
  

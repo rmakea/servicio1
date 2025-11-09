@@ -73,9 +73,7 @@ def logout():
 # 🔹 Dashboard
 # ===============================
 from datetime import datetime, timedelta
-# ===============================
-# 🔹 Dashboard
-# ===============================
+
 @app.route('/dashboard')
 @login_required
 def dashboard():
@@ -98,7 +96,9 @@ def obtener_reactivos_desde_bd():
     cur.close()
     return reactivos
 
-
+# ===============================
+# 🔹 Inventario
+# ===============================
 @app.route('/inventario')
 @login_required
 def inventario_view():
@@ -150,6 +150,53 @@ def buscar_producto():
     resultados = cur.fetchall()
     cur.close()
     return jsonify(resultados)
+
+@app.route('/actualizar_inventario', methods=['POST'])
+def actualizar_inventario():
+    data = request.get_json()
+    codigo_barras = data.get('codigo_barras')
+    tipo = data.get('tipo')
+
+    if not codigo_barras or not tipo:
+        return jsonify({'error': 'Datos incompletos'}), 400
+
+    cursor = mysql.connection.cursor()
+
+    try:
+        if tipo == 'material':
+            cursor.execute("""
+                UPDATE inventario
+                SET nombre=%s, cantidad=%s, cantidad_disponible=%s,
+                    localizacion=%s, capacidad=%s, fecha_ingreso=%s, observaciones=%s
+                WHERE codigo_barras=%s
+            """, (
+                data['nombre'], data['cantidad'], data['cantidad_disponible'],
+                data['localizacion'], data['capacidad'], data['fecha_ingreso'],
+                data['observaciones'], codigo_barras
+            ))
+        elif tipo == 'reactivo':
+            cursor.execute("""
+                UPDATE inventario
+                SET nombre=%s, color=%s, cantidad=%s, cantidad_buen_estado=%s,
+                    cantidad_disponible=%s, localizacion=%s, capacidad=%s,
+                    fecha_ingreso=%s, fecha_caducidad=%s
+                WHERE codigo_barras=%s
+            """, (
+                data['nombre'], data['color'], data['cantidad'],
+                data['cantidad_buen_estado'], data['cantidad_disponible'],
+                data['localizacion'], data['capacidad'],
+                data['fecha_ingreso'], data['fecha_caducidad'], codigo_barras
+            ))
+
+        mysql.connection.commit()
+        cursor.close()
+        return jsonify({'success': True})
+
+    except Exception as e:
+        print("Error al actualizar:", e)
+        return jsonify({'error': 'Error al actualizar producto'}), 500
+
+
 
 # ===============================
 # 🔹 Almacén
