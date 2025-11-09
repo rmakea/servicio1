@@ -1,0 +1,97 @@
+{% block content %}
+
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">🧾 Generar nuevo ticket</h2>
+
+    <form method="POST" action="{{ url_for('guardar_ticket') }}">
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <label for="solicitante" class="form-label">Nombre del solicitante:</label>
+                <input type="text" name="solicitante" id="solicitante" class="form-control" required>
+            </div>
+            <div class="col-md-4">
+                <label for="boleta" class="form-label">Boleta:</label>
+                <input type="text" name="boleta" id="boleta" class="form-control" required>
+            </div>
+            <div class="col-md-2">
+                <label for="fecha_utilizacion" class="form-label">Fecha de uso:</label>
+                <input type="date" name="fecha_utilizacion" id="fecha_utilizacion" class="form-control" required>
+            </div>
+            <div class="col-md-2">
+                <label for="hora_utilizacion" class="form-label">Hora:</label>
+                <input type="time" name="hora_utilizacion" id="hora_utilizacion" class="form-control" required>
+            </div>
+        </div>
+
+        <h5 class="mt-4">🧪 Materiales y reactivos a utilizar</h5>
+
+        <table class="table table-bordered mt-2" id="tabla-materiales">
+            <thead class="table-dark">
+                <tr>
+                    <th>Código</th>
+                    <th>Nombre</th>
+                    <th>Cantidad</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="materiales-body">
+                <tr>
+                    <td><input type="text" name="codigo[]" class="form-control codigo" placeholder="Ej. MT123"></td>
+                    <td><input type="text" class="form-control nombre" readonly></td>
+                    <td><input type="number" name="cantidad[]" class="form-control" min="1" value="1" required></td>
+                    <td><button type="button" class="btn btn-danger btn-sm eliminar-fila">❌</button></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <button type="button" class="btn btn-secondary" id="agregar-fila">➕ Agregar material</button>
+        <hr>
+        <button type="submit" class="btn btn-success">💾 Guardar ticket</button>
+        <a href="{{ url_for('tickets') }}" class="btn btn-outline-secondary">↩ Volver</a>
+    </form>
+</div>
+
+<script>
+// 🔹 Agregar nueva fila
+document.getElementById('agregar-fila').addEventListener('click', function() {
+    const tbody = document.getElementById('materiales-body');
+    const nuevaFila = document.createElement('tr');
+    nuevaFila.innerHTML = `
+        <td><input type="text" name="codigo[]" class="form-control codigo" placeholder="Ej. MT123"></td>
+        <td><input type="text" class="form-control nombre" readonly></td>
+        <td><input type="number" name="cantidad[]" class="form-control" min="1" value="1" required></td>
+        <td><button type="button" class="btn btn-danger btn-sm eliminar-fila">❌</button></td>
+    `;
+    tbody.appendChild(nuevaFila);
+});
+
+// 🔹 Eliminar fila
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('eliminar-fila')) {
+        e.target.closest('tr').remove();
+    }
+});
+
+// 🔹 Buscar nombre del material según el código
+document.addEventListener('input', async function(e) {
+    if (e.target.classList.contains('codigo')) {
+        const codigo = e.target.value.trim();
+        const fila = e.target.closest('tr');
+        const nombreInput = fila.querySelector('.nombre');
+        
+        if (codigo.length > 2) {
+            const resp = await fetch(`/inventario/buscar?q=${codigo}`);
+            const data = await resp.json();
+            if (data.length > 0) {
+                nombreInput.value = data[0].nombre;
+            } else {
+                nombreInput.value = "No encontrado";
+            }
+        } else {
+            nombreInput.value = "";
+        }
+    }
+});
+</script>
+
+{% endblock %}

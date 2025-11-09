@@ -1,341 +1,380 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>LABIIZ - Citas de Laboratorio</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
     <style>
-        .sidebar-active {
-            background-color: rgb(149,47,87);
-            color: white;
-        }
-        .table-header {
-            background-color: rgb(149,47,87);
-        }
-        .btn-action {
-            transition: all 0.3s ease;
-        }
-        .btn-action:hover {
-            transform: scale(1.1);
-        }
-        .status-approved {
-            background-color: #10b981;
-            color: white;
-        }
-        .status-pending {
-            background-color: #f59e0b;
-            color: white;
-        }
-        .status-rejected {
-            background-color: #ef4444;
-            color: white;
-        }
+      .sidebar-active {
+        background-color: rgb(149, 47, 87);
+        color: white;
+      }
+      .table-header {
+        background-color: rgb(149, 47, 87);
+      }
+      .btn-action {
+        transition: all 0.18s ease;
+      }
+      .btn-action:hover {
+        transform: scale(1.06);
+      }
+      .status-approved {
+        background-color: #10b981;
+        color: white;
+      }
+      .status-pending {
+        background-color: #f59e0b;
+        color: white;
+      }
+      .status-rejected {
+        background-color: #ef4444;
+        color: white;
+      }
+      .btn-action {
+  transition: all 0.18s ease;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-action:hover {
+  transform: scale(1.08);
+}
+.btn-action {
+  border-radius: 9999px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+
     </style>
-    <!-- Paleta IPN + ajustes -->
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'lab-purple': 'rgb(149,47,87)',      /* morado IPN */
-                        'lab-light-purple': '#952f57',
-                        'lab-table': 'rgb(255,255,255)'
-                    }
-                }
-            }
-        }
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "lab-purple": "rgb(149,47,87)",
+              "lab-table": "rgb(255,255,255)",
+              "lab-light-purple": "#952f57",
+            },
+          },
+        },
+      };
     </script>
-</head>
-<body class="bg-gray-100 min-h-screen">
-    <!-- Main Container -->
+  </head>
+  <body class="bg-gray-100 min-h-screen">
     <div class="flex h-screen">
-        <!-- ───────────────────── Sidebar ───────────────────── -->
-        <aside class="w-64 bg-white shadow-lg">
-            <div class="p-6 border-b">
-                <div class="flex items-center space-x-3">
-                    <div class="text-center">
-                        <h1 class="text-6xl font-bold text-gray-800">LABIIZ</h1>
-                        <p class="text-center text-gray-500">UPIIZ-IPN</p>
-                        <!-- Logo grande debajo del nombre -->
-                        <div class="flex justify-center mt-2">
-                            <img src="{{ url_for('static', filename='ingalim.png') }}" alt="Logo grande LABIIZ" class="w-24 h-24 object-contain">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <nav class="mt-6">
-                <div class="px-4 space-y-2">
-                    <a href="/inicio"
-                       class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-                        <i class="fas fa-home"></i><span>Inicio</span>
-                    </a>
-                    <a href="/almacen"
-                       class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-                        <i class="fas fa-boxes"></i><span>Almacén</span>
-                    </a>
-                    <a href="/citas"
-                       class="flex items-center space-x-3 px-4 py-3 bg-lab-purple text-white rounded-lg">
-                        <i class="fas fa-vial"></i><span>Citas de laboratorio</span>
-                    </a>
-                    <a href="/inventario"
-                       class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-                        <i class="fas fa-chart-bar"></i><span>Inventario</span>
-                    </a>
-                    <a href="/tickets"
-                       class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-                        <i class="fas fa-ticket-alt"></i><span>Vales de laboratorio</span>
-                    </a>
-                </div>
-            </nav>
-        </aside>
-
-        <!-- Main Content -->
-        <div class="flex-1 flex flex-col">
-            <!-- Top Header -->
-            
-            <header class="bg-lab-purple text-white px-6 py-4 flex justify-between items-center">
-                 <div>
-                        <h2 class="text-2xl font-bold text-black-800">Citas de Laboratorio</h2>
-                        <p class="text-black-600 mt-1">Gestión de citas y reservas</p>
-                    </div>
-                <div class="flex items-center space-x-4">
-                    <span class="text-sm">Nombre de usuario</span>
-                    <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                        <i class="fas fa-user text-lab-purple"></i>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Content Area -->
-            <main class="flex-1 p-6 overflow-y-auto">
-                <!-- Filters and Search -->
-                <div class="mb-6 bg-white rounded-lg shadow-sm p-4">
-                    <div class="flex flex-wrap items-center gap-4">
-                        <div class="flex-1 min-w-64">
-                            <input 
-                                type="text" 
-                                placeholder="Buscar por solicitante..." 
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                            >
-                        </div>
-                        <select class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-                            <option value="">Todos los estados</option>
-                            <option value="aprobada">Aprobada</option>
-                            <option value="pendiente">Pendiente</option>
-                            <option value="rechazada">Rechazada</option>
-                        </select>
-                        <input 
-                            type="date" 
-                            class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                        >
-                        <button class="bg-lab-purple text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
-                            <i class="fas fa-search mr-2"></i>
-                            Filtrar
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Citas Table -->
-                <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead class="table-header text-white">
-                                <tr>
-                                    <th class="px-6 py-4 text-left font-semibold">Fecha</th>
-                                    <th class="px-6 py-4 text-left font-semibold">Hora</th>
-                                    <th class="px-6 py-4 text-left font-semibold">Solicitante</th>
-                                    <th class="px-6 py-4 text-left font-semibold">Actividad</th>
-                                    <th class="px-6 py-4 text-left font-semibold">Estado</th>
-                                    <th class="px-6 py-4 text-center font-semibold">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200">
-                                <!-- Cita 1 -->
-                                <tr class="hover:bg-gray-50 transition-colors">
-                                    <td class="px-6 py-4 text-gray-800">03/07/2025</td>
-                                    <td class="px-6 py-4 text-gray-800">10:00 am</td>
-                                    <td class="px-6 py-4 text-gray-800">Juan Martínez</td>
-                                    <td class="px-6 py-4 text-gray-800">Uso de espectrofotómetro</td>
-                                    <td class="px-6 py-4">
-                                        <span class="px-3 py-1 text-xs font-semibold rounded-full status-approved">
-                                            Aprobada
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <div class="flex justify-center space-x-2">
-                                            <button onclick="aprobarCita(1)" class="w-8 h-8 bg-green-500 text-white rounded-full hover:bg-green-600 btn-action" title="Aprobar cita">
-                                                <i class="fas fa-check text-sm"></i>
-                                            </button>
-                                            <button onclick="rechazarCita(1)" class="w-8 h-8 bg-red-500 text-white rounded-full hover:bg-red-600 btn-action" title="Rechazar cita">
-                                                <i class="fas fa-times text-sm"></i>
-                                            </button>
-                                            <button onclick="verDetalles(1)" class="w-8 h-8 bg-blue-500 text-white rounded-full hover:bg-blue-600 btn-action" title="Ver detalles">
-                                                <i class="fas fa-eye text-sm"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <!-- Cita 2 -->
-                                <tr class="hover:bg-gray-50 transition-colors">
-                                    <td class="px-6 py-4 text-gray-800">04/07/2025</td>
-                                    <td class="px-6 py-4 text-gray-800">12:00 pm</td>
-                                    <td class="px-6 py-4 text-gray-800">Ana Torres</td>
-                                    <td class="px-6 py-4 text-gray-800">Análisis microbiológico</td>
-                                    <td class="px-6 py-4">
-                                        <span class="px-3 py-1 text-xs font-semibold rounded-full status-pending">
-                                            Pendiente
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <div class="flex justify-center space-x-2">
-                                            <button onclick="aprobarCita(2)" class="w-8 h-8 bg-green-500 text-white rounded-full hover:bg-green-600 btn-action" title="Aprobar cita">
-                                                <i class="fas fa-check text-sm"></i>
-                                            </button>
-                                            <button onclick="rechazarCita(2)" class="w-8 h-8 bg-red-500 text-white rounded-full hover:bg-red-600 btn-action" title="Rechazar cita">
-                                                <i class="fas fa-times text-sm"></i>
-                                            </button>
-                                            <button onclick="verDetalles(2)" class="w-8 h-8 bg-blue-500 text-white rounded-full hover:bg-blue-600 btn-action" title="Ver detalles">
-                                                <i class="fas fa-eye text-sm"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <!-- Cita 3 - Ejemplo adicional -->
-                                <tr class="hover:bg-gray-50 transition-colors">
-                                    <td class="px-6 py-4 text-gray-800">05/07/2025</td>
-                                    <td class="px-6 py-4 text-gray-800">02:00 pm</td>
-                                    <td class="px-6 py-4 text-gray-800">Carlos Ruiz</td>
-                                    <td class="px-6 py-4 text-gray-800">Pruebas de calidad</td>
-                                    <td class="px-6 py-4">
-                                        <span class="px-3 py-1 text-xs font-semibold rounded-full status-rejected">
-                                            Rechazada
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <div class="flex justify-center space-x-2">
-                                            <button onclick="aprobarCita(3)" class="w-8 h-8 bg-green-500 text-white rounded-full hover:bg-green-600 btn-action" title="Aprobar cita">
-                                                <i class="fas fa-check text-sm"></i>
-                                            </button>
-                                            <button onclick="rechazarCita(3)" class="w-8 h-8 bg-red-500 text-white rounded-full hover:bg-red-600 btn-action" title="Rechazar cita">
-                                                <i class="fas fa-times text-sm"></i>
-                                            </button>
-                                            <button onclick="verDetalles(3)" class="w-8 h-8 bg-blue-500 text-white rounded-full hover:bg-blue-600 btn-action" title="Ver detalles">
-                                                <i class="fas fa-eye text-sm"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Pagination -->
-                <div class="mt-6 flex items-center justify-between">
-                    <div class="text-sm text-gray-700">
-                        Mostrando <span class="font-semibold">1</span> a <span class="font-semibold">3</span> de <span class="font-semibold">3</span> resultados
-                    </div>
-                    <div class="flex space-x-2">
-                        <button class="px-3 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors" disabled>
-                            <i class="fas fa-chevron-left"></i>
-                        </button>
-                        <button class="px-3 py-2 bg-lab-purple text-white rounded-lg">1</button>
-                        <button class="px-3 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors" disabled>
-                            <i class="fas fa-chevron-right"></i>
-                        </button>
-                    </div>
-                </div>
-            </main>
+      <!-- Sidebar -->
+      <aside class="w-64 bg-white shadow-lg">
+        <div class="p-6 border-b text-center">
+          <h1 class="text-6xl font-bold text-gray-800">LABIIZ</h1>
+          <p class="text-gray-500">UPIIZ-IPN</p>
+          <div class="flex justify-center mt-2">
+            <img
+              src="{{ url_for('static', filename='ingalim.png') }}"
+              alt="Logo"
+              class="w-24 h-24 object-contain"
+            />
+          </div>
         </div>
+        <nav class="mt-6 px-4 space-y-2">
+          <a
+            href="/dashboard"
+            class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg"
+            ><i class="fas fa-home"></i><span>Inicio</span></a
+          >
+          <a
+            href="/almacen"
+            class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg"
+            ><i class="fas fa-boxes"></i><span>Almacén</span></a
+          >
+          <a
+            href="/citas"
+            class="flex items-center space-x-3 px-4 py-3 bg-lab-purple text-white rounded-lg"
+            ><i class="fas fa-vial"></i><span>Citas de laboratorio</span></a
+          >
+          <a
+            href="/inventario"
+            class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg"
+            ><i class="fas fa-chart-bar"></i><span>Inventario</span></a
+          >
+          <a
+            href="/tickets"
+            class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg"
+            ><i class="fas fa-ticket-alt"></i
+            ><span>Vales de laboratorio</span></a
+          >
+        </nav>
+      </aside>
+
+      <!-- Main content -->
+      <div class="flex-1 flex flex-col">
+        <header class="bg-lab-purple text-white px-6 py-4 flex justify-between items-center">
+           <div>
+            <h2 class="text-2xl font-bold">Citas de Laboratorio</h2>
+            <p class="text-sm text-white/90 mt-1">
+              Gestión y aprobación de solicitudes
+            </p>
+          </div>
+            <div class="flex items-center space-x-4">
+            <span class="text-sm">{{ usuario }}</span>
+            <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+                <i class="fas fa-user text-[#852747]"></i>
+            </div>
+            <!-- Botón de cerrar sesión -->
+    <a href="{{ url_for('logout') }}"
+   class="bg-white text-black px-3 py-1 rounded-full flex items-center space-x-2 hover:bg-gray-200 transition">
+  <i class="fas fa-sign-out-alt text-lab-purple"></i>
+  <span class="text-sm font-medium">Cerrar sesión</span>
+</a>
+</div>
+        </header>
+
+        <main class="flex-1 p-6 overflow-y-auto">
+          <!-- Filters -->
+          <div class="mb-6 bg-white rounded-lg shadow-sm p-4">
+            <div class="flex flex-wrap gap-4 items-center">
+              <input
+                id="filterNombre"
+                type="text"
+                placeholder="Buscar por solicitante..."
+                class="px-4 py-2 border rounded-lg w-80 focus:ring-2 focus:ring-lab-purple"
+              />
+              <select
+                id="filterEstado"
+                class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-lab-purple"
+              >
+                <option value="">Todos los estados</option>
+                <option value="aprobada">Aprobada</option>
+                <option value="pendiente">Pendiente</option>
+                <option value="rechazada">Rechazada</option>
+              </select>
+              <input
+                id="filterFecha"
+                type="date"
+                class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-lab-purple"
+              />
+              <button
+                id="btnFiltrar"
+                class="bg-lab-purple text-white px-4 py-2 rounded-lg hover:bg-lab-light-purple"
+              >
+                <i class="fas fa-search mr-2"></i>Filtrar
+              </button>
+            </div>
+          </div>
+
+          <!-- Table -->
+          <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+              <table
+                class="min-w-full border-collapse bg-white shadow rounded-xl overflow-hidden text-sm"
+              >
+                <thead class="table-header text-white">
+                  <tr>
+                    <th class="px-6 py-4 text-left font-semibold">
+                      Solicitante
+                    </th>
+                    <th class="px-6 py-4 text-left font-semibold">Boleta</th>
+                    <th class="px-6 py-4 text-left font-semibold">Correo</th>
+                    <th class="px-6 py-4 text-left font-semibold">Fecha</th>
+                    <th class="px-6 py-4 text-left font-semibold">Hora</th>
+                    <th class="px-6 py-4 text-left font-semibold">Estado</th>
+                    <th class="px-6 py-4 text-center font-semibold">
+                      Acciones
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody class="divide-y divide-gray-200">
+                  {% for c in citas %}
+                  <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4 text-gray-800">{{ c.solicitante }}</td>
+                    <td class="px-6 py-4 text-gray-800">{{ c.boleta }}</td>
+                    <td class="px-6 py-4 text-gray-800">
+                      {{ c.email_solicitante }}
+                    </td>
+                    <td class="px-6 py-4 text-gray-800">{{ c.fecha }}</td>
+                    <td class="px-6 py-4 text-gray-800">{{ c.hora }}</td>
+                    <td class="px-6 py-4">
+                      {% if c.estado == 'aprobado' %}
+                      <span
+                        class="px-3 py-1 text-xs font-semibold rounded-full status-approved"
+                        >Aprobado</span
+                      >
+                      {% elif c.estado == 'pendiente' %}
+                      <span
+                        class="px-3 py-1 text-xs font-semibold rounded-full status-pending"
+                        >Pendiente</span
+                      >
+                      {% elif c.estado == 'rechazado' %}
+                      <span
+                        class="px-3 py-1 text-xs font-semibold rounded-full status-rejected"
+                        >Rechazado</span
+                      >
+                      {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-center">
+  <div class="flex justify-center gap-1 flex-wrap max-w-[140px] mx-auto">
+
+                        <button
+                          data-id="{{ c.id }}"
+                          class="ver-materiales px-3 py-2 bg-blue-500 text-white rounded-full btn-action"
+                          title="Ver materiales"
+                        >
+                          <i class="fas fa-box-open"></i>
+                        </button>
+
+                        <a
+                          href="{{ url_for('cita_mail', cita_id=c.id) }}"
+                          class="px-3 py-2 bg-indigo-600 text-white rounded-full btn-action"
+                          title="Enviar correo"
+                        >
+                          <i class="fas fa-envelope"></i>
+                        </a>
+
+                        {% if c.estado == 'pendiente' %}
+                        <button
+                          onclick="aprobarCita({{c.id}})"
+                          class="px-3 py-2 bg-green-500 text-white rounded-full btn-action"
+                          title="Aprobar"
+                        >
+                          <i class="fas fa-check"></i>
+                        </button>
+
+                        <button
+                          onclick="rechazarCita({{c.id}})"
+                          class="px-3 py-2 bg-red-500 text-white rounded-full btn-action"
+                          title="Rechazar"
+                        >
+                          <i class="fas fa-times"></i>
+                        </button>
+                        {% endif %}
+                      </div>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </main>
+      </div>
     </div>
 
-    <!-- Modal para confirmar acciones -->
-    <div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 class="text-lg font-semibold mb-4" id="modalTitle">Confirmar Acción</h3>
-            <p class="text-gray-600 mb-6" id="modalMessage">¿Está seguro de realizar esta acción?</p>
-            <div class="flex justify-end space-x-4">
-                <button onclick="closeModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors">
-                    Cancelar
-                </button>
-                <button id="confirmButton" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
-                    Confirmar
-                </button>
-            </div>
+    <!-- Modal: mostrar materiales de la cita -->
+    <div
+      id="modalMat"
+      class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center"
+    >
+      <div
+        class="bg-white rounded-lg w-[90%] max-w-2xl max-h-[80vh] overflow-y-auto p-6"
+      >
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-semibold">
+            Materiales y Reactivos solicitados
+          </h3>
+          <button id="cerrarModalMat" class="text-gray-600 hover:text-gray-800">
+            <i class="fas fa-times"></i>
+          </button>
         </div>
+
+        <div id="listaMateriales" class="space-y-2 text-sm text-gray-700">
+          <!-- contenido inyectado por JS -->
+        </div>
+
+        <div class="mt-4 text-right">
+          <button
+            id="cerrarModalMat2"
+            class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+          >
+            Cerrar
+          </button>
+        </div>
+      </div>
     </div>
 
     <script>
-        // Funciones para manejar las acciones de las citas
-        function aprobarCita(citaId) {
-            showModal(
-                'Aprobar Cita',
-                '¿Está seguro de aprobar esta cita?',
-                () => {
-                    // Aquí iría la lógica para aprobar la cita
-                    window.location.href = `/citas/aprobar/${citaId}`;
-                }
-            );
-        }
+      // Abrir modal de materiales y cargar datos desde /citas/materiales/<id>
+      document.querySelectorAll(".ver-materiales").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const id = btn.dataset.id;
+          const res = await fetch(`/citas/materiales/${id}`);
+          const items = await res.json();
+          const container = document.getElementById("listaMateriales");
+          container.innerHTML = "";
 
-        function rechazarCita(citaId) {
-            showModal(
-                'Rechazar Cita',
-                '¿Está seguro de rechazar esta cita?',
-                () => {
-                    // Aquí iría la lógica para rechazar la cita
-                    window.location.href = `/citas/rechazar/${citaId}`;
-                }
-            );
-        }
-
-        function verDetalles(citaId) {
-            // Redirigir a la vista de detalles
-            window.location.href = `/citas/detalles/${citaId}`;
-        }
-
-        // Funciones para el modal
-        function showModal(title, message, confirmCallback) {
-            document.getElementById('modalTitle').textContent = title;
-            document.getElementById('modalMessage').textContent = message;
-            document.getElementById('confirmModal').classList.remove('hidden');
-            document.getElementById('confirmModal').classList.add('flex');
-            
-            document.getElementById('confirmButton').onclick = () => {
-                confirmCallback();
-                closeModal();
-            };
-        }
-
-        function closeModal() {
-            document.getElementById('confirmModal').classList.add('hidden');
-            document.getElementById('confirmModal').classList.remove('flex');
-        }
-
-        // Cerrar modal al hacer clic fuera
-        document.getElementById('confirmModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeModal();
-            }
-        });
-
-        // Función para filtrar tabla (búsqueda en tiempo real)
-        document.querySelector('input[placeholder="Buscar por solicitante..."]').addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            const rows = document.querySelectorAll('tbody tr');
-            
-            rows.forEach(row => {
-                const solicitante = row.cells[2].textContent.toLowerCase();
-                if (solicitante.includes(searchTerm)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
+          if (!items || items.length === 0) {
+            container.innerHTML =
+              '<p class="text-gray-500">No hay materiales/ reactivos seleccionados.</p>';
+          } else {
+            items.forEach((it) => {
+              // it: { codigo, nombre, tipo, cantidad }
+              container.innerHTML += `
+            <div class="p-3 border rounded">
+              <div class="font-semibold">${
+                it.nombre
+              } <span class="text-xs text-gray-500">(${it.tipo})</span></div>
+              <div class="text-xs text-gray-600">Código: ${
+                it.codigo || ""
+              } • Cantidad: ${it.cantidad || it.cantidad_solicitada || 1}</div>
+            </div>`;
             });
+          }
+
+          document.getElementById("modalMat").classList.remove("hidden");
         });
+      });
+
+      document
+        .getElementById("cerrarModalMat")
+        .addEventListener("click", () =>
+          document.getElementById("modalMat").classList.add("hidden")
+        );
+      document
+        .getElementById("cerrarModalMat2")
+        .addEventListener("click", () =>
+          document.getElementById("modalMat").classList.add("hidden")
+        );
+
+      // Aprobar/rechazar uso de confirm modal (ya tienes rutas que manejan)
+      function aprobarCita(id) {
+        if (!confirm("¿Confirmas aprobar la cita?")) return;
+        window.location.href = `/citas/aprobar/${id}`;
+      }
+      function rechazarCita(id) {
+        if (!confirm("¿Confirmas rechazar la cita?")) return;
+        window.location.href = `/citas/rechazar/${id}`;
+      }
+
+      // Búsqueda local (filtro por nombre)
+      const filterNombre = document.getElementById("filterNombre");
+      const filterEstado = document.getElementById("filterEstado");
+      const filterFecha = document.getElementById("filterFecha");
+      document.getElementById("btnFiltrar").addEventListener("click", () => {
+        const name = filterNombre.value.trim().toLowerCase();
+        const estado = filterEstado.value;
+        const fecha = filterFecha.value;
+        const rows = document.querySelectorAll("tbody tr");
+        rows.forEach((row) => {
+          let show = true;
+          if (name) {
+            show = row.children[0].textContent.toLowerCase().includes(name);
+          }
+          if (show && estado) {
+            show = row.children[4].textContent
+              .toLowerCase()
+              .includes(estado.toLowerCase());
+          }
+          if (show && fecha) {
+            show = row.children[2].textContent.trim() === fecha;
+          }
+          row.style.display = show ? "" : "none";
+        });
+      });
     </script>
-</body>
+  </body>
 </html>

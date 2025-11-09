@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-body">
+            <h3 class="text-center mb-3">🎟️ Ticket de Uso de Laboratorio</h3>
+            <hr>
+            <p><strong>Número de ticket:</strong> {{ ticket.numero_ticket }}</p>
+            <p><strong>Solicitante:</strong> {{ ticket.solicitante }}</p>
+            <p><strong>Boleta:</strong> {{ ticket.boleta }}</p>
+            <p><strong>Fecha de utilización:</strong> {{ ticket.fecha_utilizacion }}</p>
+            <p><strong>Hora de utilización:</strong> {{ ticket.hora_utilizacion }}</p>
+
+            <h5 class="mt-4">🧪 Materiales / Reactivos utilizados</h5>
+            <table class="table table-bordered mt-2">
+                <thead class="table-secondary">
+                    <tr>
+                        <th>Código</th>
+                        <th>Nombre</th>
+                        <th>Cantidad usada</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in materiales %}
+                    <tr>
+                        <td>{{ m.codigo }}</td>
+                        <td>
+                            {% set encontrado = false %}
+                            {% for item in materiales %}
+                                {% if item.codigo == m.codigo %}
+                                    {{ item.nombre if item.nombre else 'Desconocido' }}
+                                    {% set encontrado = true %}
+                                {% endif %}
+                            {% endfor %}
+                            {% if not encontrado %}Desconocido{% endif %}
+                        </td>
+                        <td>{{ m.cantidad }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="text-center mt-4">
+                <button class="btn btn-outline-primary" onclick="window.print()">🖨️ Imprimir</button>
+                <a href="{{ url_for('tickets') }}" class="btn btn-secondary">↩ Volver</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

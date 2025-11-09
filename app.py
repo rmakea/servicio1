@@ -2,6 +2,8 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import datetime, timedelta
 from flask_mysqldb import MySQL
+import json
+from urllib.parse import quote_plus
 
 app = Flask(__name__)
 
@@ -17,6 +19,8 @@ app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 mysql = MySQL(app)
 
 app.secret_key = 'tu_clave_secreta_aqui'
+
+
 
 # ===============================
 # 🔹 Decorador de login
@@ -133,69 +137,70 @@ def inventario_view():
     )
 
 
+#-----------------------------
+#@app.route('/inventario/buscar')
+#@login_required
+#def buscar_producto():
+#    query = request.args.get('q', '').lower()
+#    cur = mysql.connection.cursor()
+#    if query:
+#        cur.execute("""
+#            SELECT * FROM inventario
+#            WHERE LOWER(nombre) LIKE %s OR LOWER(tipo) LIKE %s
+#        """, ('%' + query + '%', '%' + query + '%'))
+#    else:
+#        cur.execute("SELECT * FROM inventario")
+#   
+#    resultados = cur.fetchall()
+#    cur.close()
+#    return jsonify(resultados)
+#
+#@app.route('/actualizar_inventario', methods=['POST'])
+#def actualizar_inventario():
+#    data = request.get_json()
+#    codigo_barras = data.get('codigo_barras')
+#    tipo = data.get('tipo')
 
-@app.route('/inventario/buscar')
-@login_required
-def buscar_producto():
-    query = request.args.get('q', '').lower()
-    cur = mysql.connection.cursor()
-    if query:
-        cur.execute("""
-            SELECT * FROM inventario
-            WHERE LOWER(nombre) LIKE %s OR LOWER(tipo) LIKE %s
-        """, ('%' + query + '%', '%' + query + '%'))
-    else:
-        cur.execute("SELECT * FROM inventario")
-    
-    resultados = cur.fetchall()
-    cur.close()
-    return jsonify(resultados)
+#    if not codigo_barras or not tipo:
+#        return jsonify({'error': 'Datos incompletos'}), 400
 
-@app.route('/actualizar_inventario', methods=['POST'])
-def actualizar_inventario():
-    data = request.get_json()
-    codigo_barras = data.get('codigo_barras')
-    tipo = data.get('tipo')
+#    cursor = mysql.connection.cursor()
 
-    if not codigo_barras or not tipo:
-        return jsonify({'error': 'Datos incompletos'}), 400
+#    try:
+#        if tipo == 'material':
+#            cursor.execute("""
+#                UPDATE inventario
+#                SET nombre=%s, cantidad=%s, cantidad_disponible=%s,
+#                    localizacion=%s, capacidad=%s, fecha_ingreso=%s, observaciones=%s
+#                WHERE codigo_barras=%s
+#           """, (
+#                data['nombre'], data['cantidad'], data['cantidad_disponible'],
+#                data['localizacion'], data['capacidad'], data['fecha_ingreso'],
+#                data['observaciones'], codigo_barras
+#            ))
+#        elif tipo == 'reactivo':
+#            cursor.execute("""
+#                UPDATE inventario
+#                SET nombre=%s, color=%s, cantidad=%s, cantidad_buen_estado=%s,
+#                    cantidad_disponible=%s, localizacion=%s, capacidad=%s,
+#                    fecha_ingreso=%s, fecha_caducidad=%s
+#                WHERE codigo_barras=%s
+#            """, (
+#                data['nombre'], data['color'], data['cantidad'],
+#                data['cantidad_buen_estado'], data['cantidad_disponible'],
+#                data['localizacion'], data['capacidad'],
+#                data['fecha_ingreso'], data['fecha_caducidad'], codigo_barras
+#            ))
+#
+#        mysql.connection.commit()
+#        cursor.close()
+#        return jsonify({'success': True})
+#
+#    except Exception as e:
+#        print("Error al actualizar:", e)
+#        return jsonify({'error': 'Error al actualizar producto'}), 500
 
-    cursor = mysql.connection.cursor()
-
-    try:
-        if tipo == 'material':
-            cursor.execute("""
-                UPDATE inventario
-                SET nombre=%s, cantidad=%s, cantidad_disponible=%s,
-                    localizacion=%s, capacidad=%s, fecha_ingreso=%s, observaciones=%s
-                WHERE codigo_barras=%s
-            """, (
-                data['nombre'], data['cantidad'], data['cantidad_disponible'],
-                data['localizacion'], data['capacidad'], data['fecha_ingreso'],
-                data['observaciones'], codigo_barras
-            ))
-        elif tipo == 'reactivo':
-            cursor.execute("""
-                UPDATE inventario
-                SET nombre=%s, color=%s, cantidad=%s, cantidad_buen_estado=%s,
-                    cantidad_disponible=%s, localizacion=%s, capacidad=%s,
-                    fecha_ingreso=%s, fecha_caducidad=%s
-                WHERE codigo_barras=%s
-            """, (
-                data['nombre'], data['color'], data['cantidad'],
-                data['cantidad_buen_estado'], data['cantidad_disponible'],
-                data['localizacion'], data['capacidad'],
-                data['fecha_ingreso'], data['fecha_caducidad'], codigo_barras
-            ))
-
-        mysql.connection.commit()
-        cursor.close()
-        return jsonify({'success': True})
-
-    except Exception as e:
-        print("Error al actualizar:", e)
-        return jsonify({'error': 'Error al actualizar producto'}), 500
-
+#
 
 
 # ===============================
@@ -274,53 +279,225 @@ def eliminar_producto(codigo_barras):
 # ===============================
 # 🔹 Citas
 # ===============================
+# Listar citas (página)
 @app.route('/citas')
 @login_required
-def citas():
+def citas_view():
     cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM citas")
-    citas_db = cur.fetchall()
+    cur.execute("SELECT id, solicitante, boleta, email_solicitante, fecha, hora, estado FROM citas ORDER BY fecha, hora")
+    citas = cur.fetchall()
     cur.close()
-    return render_template('citas.html', citas=citas_db)
+    return render_template('citas.html', citas=citas, usuario=session.get('user_id'))
 
-@app.route('/aprobar/<int:id>', methods=['POST'])
+# API: obtener lista de materiales de una cita (JSON)
+@app.route('/citas/materiales/<int:cita_id>')
+@login_required
+def cita_materiales(cita_id):
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT materiales FROM citas WHERE id = %s", (cita_id,))
+    row = cur.fetchone()
+    cur.close()
+    if not row or not row.get('materiales'):
+        return jsonify([])
+    try:
+        items = json.loads(row['materiales'])
+    except Exception:
+        items = []
+    return jsonify(items)
+
+# Generar mailto pre-armado (abre cliente de correo)
+@app.route('/citas/mail/<int:cita_id>')
+@login_required
+def cita_mail(cita_id):
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT id, solicitante, boleta, email_solicitante, fecha, hora FROM citas WHERE id = %s", (cita_id,))
+    c = cur.fetchone()
+    cur.close()
+    if not c:
+        return "Cita no encontrada", 404
+
+    approve_url = request.url_root.rstrip('/') + url_for('aprobar_cita', id=c['id'])
+    reject_url = request.url_root.rstrip('/') + url_for('rechazar_cita', id=c['id'])
+    subject = f"Aprobación cita laboratorio - {c['solicitante']} ({c['boleta']})"
+    body = (
+        f"Solicitud de cita:\n\n"
+        f"Solicitante: {c['solicitante']}\n"
+        f"Boleta: {c['boleta']}\n"
+        f"Fecha: {c['fecha']} Hora: {c['hora']}\n\n"
+        f"Aprobar: {approve_url}\n"
+        f"Rechazar: {reject_url}\n"
+    )
+    mailto = f"mailto:?subject={quote_plus(subject)}&body={quote_plus(body)}"
+    return redirect(mailto)
+
+# Aprobar / rechazar (links del correo)
+@app.route('/citas/aprobar/<int:id>', methods=['GET','POST'])
 @login_required
 def aprobar_cita(id):
     cur = mysql.connection.cursor()
-    cur.execute("UPDATE citas SET estado = 'Aprobada' WHERE id = %s", (id,))
+    cur.execute("UPDATE citas SET estado = 'aprobada' WHERE id = %s", (id,))
     mysql.connection.commit()
     cur.close()
-    return redirect(url_for('citas'))
+    # al aprobar, puedes redirect a creación de ticket o a listado de tickets
+    return redirect(url_for('listar_tickets'))
 
-@app.route('/rechazar/<int:id>', methods=['POST'])
+@app.route('/citas/rechazar/<int:id>', methods=['GET','POST'])
 @login_required
 def rechazar_cita(id):
     cur = mysql.connection.cursor()
-    cur.execute("UPDATE citas SET estado = 'Rechazada' WHERE id = %s", (id,))
+    cur.execute("UPDATE citas SET estado = 'rechazada' WHERE id = %s", (id,))
     mysql.connection.commit()
     cur.close()
-    return redirect(url_for('citas'))
-
-@app.route('/ver/<int:id>')
-@login_required
-def ver_cita(id):
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM citas WHERE id = %s", (id,))
-    cita = cur.fetchone()
-    cur.close()
-    return render_template('ver_cita.html', cita=cita)
+    return redirect(url_for('citas_view'))
 
 # ===============================
 # 🔹 Tickets
 # ===============================
+def get_db_connection():
+    return mysql.connection
+
 @app.route('/tickets')
-@login_required
-def listar_tickets():
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM tickets")
-    tickets = cur.fetchall()
-    cur.close()
+def tickets():
+    conexion = get_db_connection()
+    cursor = conexion.cursor()  # solo cursor normal
+    cursor.execute("SELECT * FROM tickets ORDER BY fecha_creacion DESC")
+    tickets = cursor.fetchall()
+    cursor.close()
+    
+    # Convertir hora_utilizacion a string si es timedelta
+    for t in tickets:
+        if isinstance(t['hora_utilizacion'], timedelta):
+            total_seconds = t['hora_utilizacion'].total_seconds()
+            hours = int(total_seconds // 3600)
+            minutes = int((total_seconds % 3600) // 60)
+            t['hora_str'] = f"{hours:02d}:{minutes:02d}"
+        else:
+            t['hora_str'] = t['hora_utilizacion']  # ya es string
+
     return render_template('tickets.html', tickets=tickets)
+
+
+
+@app.route('/tickets/nuevo')
+@login_required
+def nuevo_ticket():
+    # Obtener materiales del inventario para mostrarlos en el formulario
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM inventario")
+    materiales = cur.fetchall()
+    cur.close()
+    return render_template('nuevo_ticket.html', materiales=materiales)
+
+
+@app.route('/tickets/ver/<int:ticket_id>')
+@login_required
+def ver_ticket(ticket_id):
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM tickets WHERE id = %s", (ticket_id,))
+    ticket = cur.fetchone()
+
+    if not ticket:
+        flash("Ticket no encontrado", "error")
+        return redirect(url_for('tickets'))
+
+    try:
+        materiales = json.loads(ticket['materiales'])
+    except Exception:
+        materiales = []
+
+    cur.close()
+    return render_template('ver_ticket.html', ticket=ticket, materiales=materiales)
+
+
+@app.route('/tickets/subir-foto', methods=['POST'])
+@login_required
+def subir_foto_ticket():
+    ticket_id = request.form.get('ticket_id')
+    foto = request.files.get('foto')
+
+    if not foto or not ticket_id:
+        return jsonify({'success': False, 'error': 'Datos incompletos'})
+
+    # Guardar la imagen en la carpeta static/uploads/tickets/
+    upload_folder = os.path.join(app.root_path, 'static', 'uploads', 'tickets')
+    os.makedirs(upload_folder, exist_ok=True)
+
+    filename = f"ticket_{ticket_id}_{foto.filename}"
+    path = os.path.join(upload_folder, filename)
+    foto.save(path)
+
+    # Guardar la ruta en la BD
+    cur = mysql.connection.cursor()
+    cur.execute("UPDATE tickets SET evidencia = %s WHERE id = %s", (filename, ticket_id))
+    mysql.connection.commit()
+    cur.close()
+
+    return jsonify({'success': True})
+
+@app.route('/guardar_ticket', methods=['POST'])
+def guardar_ticket():
+    solicitante = request.form['solicitante']
+    boleta = request.form['boleta']
+    fecha = request.form['fecha_utilizacion']
+    hora = request.form['hora_utilizacion']
+    codigos = request.form.getlist('codigo[]')
+    cantidades = request.form.getlist('cantidad[]')
+
+    materiales = []
+    for codigo, cantidad in zip(codigos, cantidades):
+        materiales.append({"codigo": codigo, "cantidad": int(cantidad)})
+
+    materiales_json = json.dumps(materiales)
+
+    conexion = get_db_connection()
+    cursor = conexion.cursor()  # quitar dictionary=True
+
+
+    # Generar número de ticket
+    cursor.execute("SELECT COUNT(*) AS total FROM tickets")
+    total = cursor.fetchone()['total'] + 1
+    numero_ticket = f"TCK-{total:04d}"
+
+    # Insertar ticket
+    cursor.execute("""
+        INSERT INTO tickets (numero_ticket, solicitante, boleta, fecha_utilizacion, hora_utilizacion, materiales)
+        VALUES (%s, %s, %s, %s, %s, %s)
+    """, (numero_ticket, solicitante, boleta, fecha, hora, materiales_json))
+
+    # Descontar materiales del inventario
+    for item in materiales:
+        codigo = item['codigo']
+        cantidad = item['cantidad']
+        cursor.execute("""
+            UPDATE inventario SET cantidad = cantidad - %s WHERE codigo = %s
+        """, (cantidad, codigo))
+
+    conexion.commit()
+    cursor.close()
+    conexion.close()
+
+    flash(f"Ticket {numero_ticket} generado exitosamente", "success")
+    return redirect(url_for('tickets'))
+
+@app.route("/inventario/buscar")
+@login_required
+def buscar_inventario():
+    try:
+        q = request.args.get("q", "").upper()
+        conn = get_db_connection()
+        cursor = conn.cursor()  # quitar dictionary=True
+        cursor.execute("""
+            SELECT codigo_barras AS codigo, nombre 
+            FROM inventario 
+            WHERE UPPER(codigo_barras) LIKE %s OR UPPER(nombre) LIKE %s
+        """, (f"%{q}%", f"%{q}%"))
+        resultados = cursor.fetchall()
+        conn.close()
+        return jsonify([{"codigo": r["codigo"], "nombre": r["nombre"]} for r in resultados])
+
+    except Exception as e:
+        print("ERROR:", e)
+        return jsonify({"error": str(e)}), 500
 
 # ===============================
 # 🔹 Funciones auxiliares

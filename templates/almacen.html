@@ -66,11 +66,17 @@
         <header class="bg-lab-purple text-white px-6 py-4 flex justify-between items-center">
             <h2 class="text-xl font-semibold">Almacén</h2>
             <div class="flex items-center space-x-4">
-                <span class="text-sm">Nombre de usuario</span>
-                <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                    <i class="fas fa-user text-lab-purple"></i>
-                </div>
+            <span class="text-sm">{{ usuario }}</span>
+            <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+                <i class="fas fa-user text-[#852747]"></i>
             </div>
+            <!-- Botón de cerrar sesión -->
+    <a href="{{ url_for('logout') }}"
+   class="bg-white text-black px-3 py-1 rounded-full flex items-center space-x-2 hover:bg-gray-200 transition">
+  <i class="fas fa-sign-out-alt text-lab-purple"></i>
+  <span class="text-sm font-medium">Cerrar sesión</span>
+</a>
+</div>
         </header>
 
         <div class="p-8 space-y-8">

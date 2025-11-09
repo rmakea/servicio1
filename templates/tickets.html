@@ -1,370 +1,479 @@
 <!DOCTYPE html>
 <html lang="es">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>LABIIZ - Tickets</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
     <style>
-        .sidebar-active {
-            background-color: rgb(149, 47, 87);
-            color: white;
-        }
+      .sidebar-active {
+        background-color: rgb(149, 47, 87);
+        color: white;
+      }
 
-        .table-header {
-            background-color: rgb(149, 47, 87);
-        }
+      .table-header {
+        background-color: rgb(149, 47, 87);
+      }
 
-        .btn-action {
-            transition: all 0.3s ease;
-        }
+      .btn-action {
+        transition: all 0.3s ease;
+      }
 
-        .btn-action:hover {
-            transform: scale(1.1);
-        }
+      .btn-action:hover {
+        transform: scale(1.1);
+      }
 
-        .status-approved {
-            background-color: #10b981;
-            color: white;
-        }
+      .status-approved {
+        background-color: #10b981;
+        color: white;
+      }
 
-        .status-pending {
-            background-color: #f59e0b;
-            color: white;
-        }
+      .status-pending {
+        background-color: #f59e0b;
+        color: white;
+      }
 
-        .status-rejected {
-            background-color: #ef4444;
-            color: white;
-        }
+      .status-rejected {
+        background-color: #ef4444;
+        color: white;
+      }
     </style>
     <!-- Paleta IPN + ajustes -->
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'lab-purple': 'rgb(149,47,87)',      /* morado IPN */
-                        'lab-light-purple': '#952f57',
-                        'lab-table': 'rgb(255,255,255)'
-                    }
-                }
-            }
-        }
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "lab-purple": "rgb(149,47,87)" /* morado IPN */,
+              "lab-light-purple": "#952f57",
+              "lab-table": "rgb(255,255,255)",
+            },
+          },
+        },
+      };
     </script>
-</head>
+  </head>
 
-<body class="bg-gray-100 min-h-screen">
+  <body class="bg-gray-100 min-h-screen">
     <!-- Main Container -->
     <div class="flex h-screen">
-        <!-- ───────────────────── Sidebar ───────────────────── -->
-        <aside class="w-64 bg-white shadow-lg">
-            <div class="p-6 border-b">
-                <div class="flex items-center space-x-3">
-                    <div class="text-center">
-                        <h1 class="text-6xl font-bold text-gray-800">LABIIZ</h1>
-                        <p class="text-center text-gray-500">UPIIZ-IPN</p>
-                        <!-- Logo grande debajo del nombre -->
-                        <div class="flex justify-center mt-2">
-                            <img src="{{ url_for('static', filename='ingalim.png') }}" alt="Logo grande LABIIZ"
-                                class="w-24 h-24 object-contain">
-                        </div>
-                    </div>
-                </div>
+      <!-- ───────────────────── Sidebar ───────────────────── -->
+      <aside class="w-64 bg-white shadow-lg">
+        <div class="p-6 border-b">
+          <div class="flex items-center space-x-3">
+            <div class="text-center">
+              <h1 class="text-6xl font-bold text-gray-800">LABIIZ</h1>
+              <p class="text-center text-gray-500">UPIIZ-IPN</p>
+              <!-- Logo grande debajo del nombre -->
+              <div class="flex justify-center mt-2">
+                <img
+                  src="{{ url_for('static', filename='ingalim.png') }}"
+                  alt="Logo grande LABIIZ"
+                  class="w-24 h-24 object-contain"
+                />
+              </div>
             </div>
-
-            <nav class="mt-6">
-                <div class="px-4 space-y-2">
-                    <a href="/inicio"
-                        class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-                        <i class="fas fa-home"></i><span>Inicio</span>
-                    </a>
-                    <a href="/almacen"
-                        class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-                        <i class="fas fa-boxes"></i><span>Almacén</span>
-                    </a>
-                    <a href="/citas"
-                        class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-                        <i class="fas fa-vial"></i><span>Citas de laboratorio</span>
-                    </a>
-                    <a href="/inventario"
-                        class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-                        <i class="fas fa-chart-bar"></i><span>Inventario</span>
-                    </a>
-                    <a href="/tickets"
-                        class="flex items-center space-x-3 px-4 py-3 bg-lab-purple text-white rounded-lg">
-                        <i class="fas fa-ticket-alt"></i><span>Vales de laboratorio</span>
-                    </a>
-                </div>
-            </nav>
-        </aside>
-
-        <!-- Main Content -->
-        <div class="flex-1 flex flex-col">
-            <!-- Top Header -->
-            <header class="bg-lab-purple text-white px-6 py-4 flex justify-between items-center">
-                <div>
-                    <h2 class="text-2xl font-bold text-black-800">Vales de laboratorio</h2>
-                    <p class="text-black-600 mt-1">Gestión de tickets de laboratorio</p>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <span class="text-sm">Nombre de usuario</span>
-                    <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                        <i class="fas fa-user text-lab-purple"></i>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Content Area -->
-            <main class="flex-1 p-6 overflow-y-auto">
-                <!-- Search and Generate Button -->
-                <div class="mb-6 flex items-center justify-between">
-                    <div class="relative flex-1 max-w-md">
-                        <input type="text" placeholder="Buscar..."
-                            class="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                            id="searchInput">
-                        <i class="fas fa-search absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                    </div>
-                    <button onclick="generarNuevoTicket()"
-                        class="bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition-colors font-semibold">
-                        Generar Nuevo Ticket
-                    </button>
-                </div>
-
-                <!-- Tickets Table -->
-                <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead class="table-header text-white">
-                                <tr>
-                                    <th class="px-6 py-4 text-left font-semibold">Solicitante</th>
-                                    <th class="px-6 py-4 text-left font-semibold">Fecha y Hora</th>
-                                    <th class="px-6 py-4 text-center font-semibold">Ver Tickets</th>
-                                    <th class="px-6 py-4 text-center font-semibold">Evidencia</th>
-                                    <th class="px-6 py-4 text-center font-semibold">Estatus</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200">
-                                <!-- Ticket con datos reales -->
-                                <tr class="hover:bg-gray-50 transition-colors">
-                                    <td class="px-6 py-4 text-gray-800 font-medium">Juan Martínez</td>
-                                    <td class="px-6 py-4 text-gray-800">03/07/2025 - 10:00 am</td>
-                                    <td class="px-6 py-4 text-center">
-                                        <button onclick="verTicket(1)"
-                                            class="w-12 h-12 bg-lab-purple ticket-icon rounded-lg flex items-center justify-center btn-action hover:shadow-lg"
-                                            title="Ver ticket">
-                                            <i class="fas fa-ticket-alt text-white text-xl"></i>
-                                        </button>
-                                    </td>
-                                    <td class="px-6 py-4 text-center">
-                                        <button onclick="agregarFoto(1)"
-                                            class="w-12 h-12 bg-lab-purple camera-icon rounded-lg flex items-center justify-center btn-action hover:shadow-lg"
-                                            title="Agregar foto">
-                                            <i class="fas fa-camera text-white text-xl"></i>
-                                        </button>
-                                    </td>
-                                    <td class="px-6 py-4 text-center">
-                                        <span class="px-3 py-1 text-xs font-semibold rounded-full status-complete">
-                                            Con adeudo
-                                        </span>
-                                    </td>
-                                </tr>
-
-                                <!-- Otro ticket con datos reales -->
-                                <tr class="hover:bg-gray-50 transition-colors">
-                                    <td class="px-6 py-4 text-gray-800 font-medium">Ana Torres</td>
-                                    <td class="px-6 py-4 text-gray-800">04/07/2025 - 12:00 pm</td>
-                                    <td class="px-6 py-4 text-center">
-                                        <button onclick="verTicket(2)"
-                                            class="w-12 h-12 bg-lab-purple ticket-icon rounded-lg flex items-center justify-center btn-action hover:shadow-lg"
-                                            title="Ver ticket">
-                                            <i class="fas fa-ticket-alt text-white text-xl"></i>
-                                        </button>
-                                    </td>
-                                    <td class="px-6 py-4 text-center">
-                                        <button onclick="agregarFoto(2)"
-                                            class="w-12 h-12 bg-lab-purple camera-icon rounded-lg flex items-center justify-center btn-action hover:shadow-lg"
-                                            title="Agregar foto">
-                                            <i class="fas fa-camera text-white text-xl"></i>
-                                        </button>
-                                    </td>
-                                    <td class="px-6 py-4 text-center">
-                                        <span class="px-3 py-1 text-xs font-semibold rounded-full status-incomplete">
-                                            Sin adeudo
-                                        </span>
-                                    </td>
-                                </tr>
-
-
-                            </tbody>
-
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Pagination -->
-                <div class="mt-6 flex items-center justify-between">
-                    <div class="text-sm text-gray-700">
-                        Mostrando <span class="font-semibold">1</span> a <span class="font-semibold">2</span> de <span
-                            class="font-semibold">2</span> resultados
-                    </div>
-                    <div class="flex space-x-2">
-                        <button
-                            class="px-3 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
-                            disabled>
-                            <i class="fas fa-chevron-left"></i>
-                        </button>
-                        <button class="px-3 py-2 bg-lab-purple text-white rounded-lg">1</button>
-                        <button
-                            class="px-3 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
-                            disabled>
-                            <i class="fas fa-chevron-right"></i>
-                        </button>
-                    </div>
-                </div>
-            </main>
+          </div>
         </div>
+
+        <nav class="mt-6">
+          <div class="px-4 space-y-2">
+            <a
+              href="/dashboard"
+              class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <i class="fas fa-home"></i><span>Inicio</span>
+            </a>
+            <a
+              href="/almacen"
+              class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <i class="fas fa-boxes"></i><span>Almacén</span>
+            </a>
+            <a
+              href="/citas"
+              class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <i class="fas fa-vial"></i><span>Citas de laboratorio</span>
+            </a>
+            <a
+              href="/inventario"
+              class="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <i class="fas fa-chart-bar"></i><span>Inventario</span>
+            </a>
+            <a
+              href="/tickets"
+              class="flex items-center space-x-3 px-4 py-3 bg-lab-purple text-white rounded-lg"
+            >
+              <i class="fas fa-ticket-alt"></i><span>Vales de laboratorio</span>
+            </a>
+          </div>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <div class="flex-1 flex flex-col">
+        <!-- Top Header -->
+        <header class="bg-lab-purple text-white px-6 py-4 flex justify-between items-center">
+            <div>
+            <h2 class="text-2xl font-bold text-black-800">
+              Vales de laboratorio
+            </h2>
+            <p class="text-black-600 mt-1">Gestión de tickets de laboratorio</p>
+          </div>
+            <div class="flex items-center space-x-4">
+            <span class="text-sm">{{ usuario }}</span>
+            <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+                <i class="fas fa-user text-[#852747]"></i>
+            </div>
+            <!-- Botón de cerrar sesión -->
+    <a href="{{ url_for('logout') }}"
+   class="bg-white text-black px-3 py-1 rounded-full flex items-center space-x-2 hover:bg-gray-200 transition">
+  <i class="fas fa-sign-out-alt text-lab-purple"></i>
+  <span class="text-sm font-medium">Cerrar sesión</span>
+</a>
+</div>
+        </header>
+
+        <!-- Content Area -->
+        <main class="flex-1 p-6 overflow-y-auto">
+          <!-- Search and Generate Button -->
+          <div class="mb-6 flex items-center justify-between">
+            <div class="relative flex-1 max-w-md">
+              <input
+                type="text"
+                placeholder="Buscar..."
+                class="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                id="searchInput"
+              />
+              <i
+                class="fas fa-search absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400"
+              ></i>
+            </div>
+           <button
+  onclick="abrirModalNuevoTicket()"
+  class="bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition-colors font-semibold"
+>
+  Generar Nuevo Ticket
+</button>
+
+
+          </div>
+
+          <!-- Tickets Table -->
+          <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full">
+                <thead class="table-header text-white">
+                  <tr>
+                    <th class="px-6 py-4 text-left font-semibold">
+                      Solicitante
+                    </th>
+                    <th class="px-6 py-4 text-left font-semibold">
+                      Fecha y Hora
+                    </th>
+                    <th class="px-6 py-4 text-center font-semibold">
+                      Ver Tickets
+                    </th>
+                    <th class="px-6 py-4 text-center font-semibold">
+                      Evidencia
+                    </th>
+                    <th class="px-6 py-4 text-center font-semibold">Estatus</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                  {% for t in tickets %}
+                  <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4 text-gray-800 font-medium">
+                      {{ t.solicitante }}
+                    </td>
+                    <td class="px-6 py-4 text-gray-800">
+                     {{ t.hora_str }} - {{ t.hora_str }}
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                      <button
+                        onclick="verTicket({{ t.id }})"
+                        class="w-12 h-12 bg-lab-purple ticket-icon rounded-lg flex items-center justify-center btn-action hover:shadow-lg"
+                        title="Ver ticket"
+                      >
+                        <i class="fas fa-ticket-alt text-white text-xl"></i>
+                      </button>
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                      <button
+                        onclick="agregarFoto({{ t.id }})"
+                        class="w-12 h-12 bg-lab-purple camera-icon rounded-lg flex items-center justify-center btn-action hover:shadow-lg"
+                        title="Agregar foto"
+                      >
+                        <i class="fas fa-camera text-white text-xl"></i>
+                      </button>
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                      {% if t.estado == 'adeudo' %}
+                      <span
+                        class="px-3 py-1 text-xs font-semibold rounded-full status-approved"
+                      >
+                        Con adeudo
+                      </span>
+                      {% else %}
+                      <span
+                        class="px-3 py-1 text-xs font-semibold rounded-full status-pending"
+                      >
+                        Sin adeudo
+                      </span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Pagination -->
+          <div class="mt-6 flex items-center justify-between">
+            <div class="text-sm text-gray-700">
+              Mostrando <span class="font-semibold">1</span> a
+              <span class="font-semibold">2</span> de
+              <span class="font-semibold">2</span> resultados
+            </div>
+            <div class="flex space-x-2">
+              <button
+                class="px-3 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+                disabled
+              >
+                <i class="fas fa-chevron-left"></i>
+              </button>
+              <button class="px-3 py-2 bg-lab-purple text-white rounded-lg">
+                1
+              </button>
+              <button
+                class="px-3 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+                disabled
+              >
+                <i class="fas fa-chevron-right"></i>
+              </button>
+            </div>
+          </div>
+        </main>
+      </div>
     </div>
 
     <!-- Modal para subir foto -->
-    <div id="fotoModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 class="text-lg font-semibold mb-4">Agregar Evidencia Fotográfica</h3>
-            <div class="space-y-4">
-                <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                    <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
-                    <p class="text-gray-600 mb-2">Arrastra una imagen aquí o haz clic para seleccionar</p>
-                    <input type="file" id="fotoInput" accept="image/*" class="hidden">
-                    <button onclick="document.getElementById('fotoInput').click()"
-                        class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
-                        Seleccionar Archivo
-                    </button>
-                </div>
-                <div class="flex justify-end space-x-4">
-                    <button onclick="cerrarFotoModal()"
-                        class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors">
-                        Cancelar
-                    </button>
-                    <button onclick="subirFoto()"
-                        class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
-                        Subir Foto
-                    </button>
-                </div>
-            </div>
+    <div
+      id="fotoModal"
+      class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50"
+    >
+      <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+        <h3 class="text-lg font-semibold mb-4">
+          Agregar Evidencia Fotográfica
+        </h3>
+        <div class="space-y-4">
+          <div
+            class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center"
+          >
+            <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+            <p class="text-gray-600 mb-2">
+              Arrastra una imagen aquí o haz clic para seleccionar
+            </p>
+            <input type="file" id="fotoInput" accept="image/*" class="hidden" />
+            <button
+              onclick="document.getElementById('fotoInput').click()"
+              class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+            >
+              Seleccionar Archivo
+            </button>
+          </div>
+          <div class="flex justify-end space-x-4">
+            <button
+              onclick="cerrarFotoModal()"
+              class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              onclick="subirFoto()"
+              class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            >
+              Subir Foto
+            </button>
+          </div>
         </div>
+      </div>
     </div>
 
-    <script>
-        let currentTicketId = null;
+    <!-- Modal Generar Nuevo Ticket -->
+<div id="modalNuevoTicket" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+  <div class="bg-white rounded-xl shadow-xl max-w-4xl w-full mx-4 overflow-y-auto max-h-[90vh]">
+    <div class="flex justify-between items-center p-4 border-b">
+      <h3 class="text-xl font-bold text-gray-800">🧾 Generar Nuevo Ticket</h3>
+      <button onclick="cerrarModalNuevoTicket()" class="text-gray-600 hover:text-gray-800 text-2xl">&times;</button>
+    </div>
+    <div class="p-6">
+      <form id="formNuevoTicket">
+        <!-- Datos del solicitante -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+          <div>
+            <label class="block font-medium mb-1">Nombre del solicitante</label>
+            <input type="text" name="solicitante" class="w-full border rounded px-3 py-2" required>
+          </div>
+          <div>
+            <label class="block font-medium mb-1">Boleta</label>
+            <input type="text" name="boleta" class="w-full border rounded px-3 py-2" required>
+          </div>
+          <div>
+            <label class="block font-medium mb-1">Fecha de uso</label>
+            <input type="date" name="fecha_utilizacion" class="w-full border rounded px-3 py-2" required>
+          </div>
+          <div>
+            <label class="block font-medium mb-1">Hora</label>
+            <input type="time" name="hora_utilizacion" class="w-full border rounded px-3 py-2" required>
+          </div>
+        </div>
 
-        // Función para ver ticket
-        function verTicket(ticketId) {
-            // Redirigir a la vista del ticket
-            window.location.href = `/tickets/ver/${ticketId}`;
-        }
+        <!-- Materiales -->
+        <h5 class="font-semibold mb-2">🧪 Materiales y reactivos</h5>
+        <table class="w-full border rounded mb-4">
+          <thead class="bg-gray-100">
+            <tr>
+              <th class="border px-2 py-1">Código</th>
+              <th class="border px-2 py-1">Nombre</th>
+              <th class="border px-2 py-1">Cantidad</th>
+              <th class="border px-2 py-1">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="materiales-body-modal">
+            <tr>
+              <td><input type="text" name="codigo[]" class="border rounded px-2 py-1 codigo" placeholder="Ej. MT123"></td>
+              <td><input type="text" class="border rounded px-2 py-1 nombre" readonly></td>
+              <td><input type="number" name="cantidad[]" class="border rounded px-2 py-1" min="1" value="1" required></td>
+              <td><button type="button" class="bg-red-500 text-white px-2 py-1 rounded eliminar-fila">❌</button></td>
+            </tr>
+          </tbody>
+        </table>
+        <button type="button" id="agregar-fila-modal" class="bg-gray-300 text-gray-800 px-3 py-1 rounded mb-4">➕ Agregar material</button>
 
-        // Función para agregar foto
-        function agregarFoto(ticketId) {
-            currentTicketId = ticketId;
-            document.getElementById('fotoModal').classList.remove('hidden');
-            document.getElementById('fotoModal').classList.add('flex');
-        }
+        <!-- Botones -->
+        <div class="flex justify-end space-x-2">
+          <button type="button" onclick="cerrarModalNuevoTicket()" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancelar</button>
+          <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">💾 Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 
-        // Función para cerrar modal de foto
-        function cerrarFotoModal() {
-            document.getElementById('fotoModal').classList.add('hidden');
-            document.getElementById('fotoModal').classList.remove('flex');
-            currentTicketId = null;
-        }
+<script>
+  // ────────── Modal ──────────
+  function abrirModalNuevoTicket() {
+    const modal = document.getElementById("modalNuevoTicket");
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+  }
 
-        // Función para subir foto
-        function subirFoto() {
-            const fileInput = document.getElementById('fotoInput');
-            const file = fileInput.files[0];
+  function cerrarModalNuevoTicket() {
+    const modal = document.getElementById("modalNuevoTicket");
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+    document.getElementById("formNuevoTicket").reset();
+    // Limpiar tabla y dejar una fila por defecto
+    const tbody = document.getElementById("materiales-body-modal");
+    tbody.innerHTML = `<tr>
+      <td><input type="text" name="codigo[]" class="border rounded px-2 py-1 codigo" placeholder="Ej. MT123"></td>
+      <td><input type="text" class="border rounded px-2 py-1 nombre" readonly></td>
+      <td><input type="number" name="cantidad[]" class="border rounded px-2 py-1" min="1" value="1" required></td>
+      <td><button type="button" class="bg-red-500 text-white px-2 py-1 rounded eliminar-fila">❌</button></td>
+    </tr>`;
+  }
 
-            if (file) {
-                // Aquí iría la lógica para subir la foto
-                const formData = new FormData();
-                formData.append('foto', file);
-                formData.append('ticket_id', currentTicketId);
+  // ────────── Agregar / Eliminar fila ──────────
+  function agregarFilaMaterial() {
+    const tbody = document.getElementById("materiales-body-modal");
+    const fila = document.createElement("tr");
+    fila.innerHTML = `
+      <td><input type="text" name="codigo[]" class="border rounded px-2 py-1 codigo" placeholder="Ej. RC002"></td>
+      <td><input type="text" class="border rounded px-2 py-1 nombre" readonly></td>
+      <td><input type="number" name="cantidad[]" class="border rounded px-2 py-1" min="1" value="1" required></td>
+      <td><button type="button" class="bg-red-500 text-white px-2 py-1 rounded eliminar-fila">❌</button></td>
+    `;
+    tbody.appendChild(fila);
+  }
 
-                // Ejemplo de envío con fetch
-                fetch('/tickets/subir-foto', {
-                    method: 'POST',
-                    body: formData
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Foto subida exitosamente');
-                            cerrarFotoModal();
-                            location.reload();
-                        } else {
-                            alert('Error al subir la foto');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Error al subir la foto');
-                    });
-            } else {
-                alert('Por favor selecciona una imagen');
-            }
-        }
+  document.getElementById("agregar-fila-modal").addEventListener("click", agregarFilaMaterial);
 
-        // Función para generar nuevo ticket
-        function generarNuevoTicket() {
-            window.location.href = '/tickets/nuevo';
-        }
+  document.getElementById("materiales-body-modal").addEventListener("click", function(e) {
+    if (e.target.classList.contains("eliminar-fila")) {
+      e.target.closest("tr").remove();
+    }
+  });
 
-        // Función de búsqueda
-        document.getElementById('searchInput').addEventListener('input', function (e) {
-            const searchTerm = e.target.value.toLowerCase();
-            const rows = document.querySelectorAll('tbody tr');
+  // ────────── Autocomplete nombre del material ──────────
+  async function buscarNombreMaterial(codigo) {
+    if (codigo.length < 3) return null;
+    try {
+      const resp = await fetch(`/inventario/buscar?q=${codigo}`);
+      const data = await resp.json();
+      return data.length > 0 ? data[0].nombre : "";
+    } catch (error) {
+      console.error("Error buscando material:", error);
+      return "";
+    }
+  }
 
-            rows.forEach(row => {
-                const solicitante = row.cells[0].textContent.toLowerCase();
-                const fecha = row.cells[1].textContent.toLowerCase();
+  document.getElementById("materiales-body-modal").addEventListener("input", async function(e) {
+    if (e.target.classList.contains("codigo")) {
+      const codigo = e.target.value.trim().toUpperCase();
+      const fila = e.target.closest("tr");
+      const nombreInput = fila.querySelector(".nombre");
+      nombreInput.value = await buscarNombreMaterial(codigo);
+    }
+  });
 
-                if (solicitante.includes(searchTerm) || fecha.includes(searchTerm)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        });
+  // También cubrir el evento "change" por si pegan el código
+  document.getElementById("materiales-body-modal").addEventListener("change", function(e) {
+    if (e.target.classList.contains("codigo")) {
+      e.target.dispatchEvent(new Event("input"));
+    }
+  });
 
-        // Cerrar modal al hacer clic fuera
-        document.getElementById('fotoModal').addEventListener('click', function (e) {
-            if (e.target === this) {
-                cerrarFotoModal();
-            }
-        });
+  // ────────── Guardar ticket vía AJAX ──────────
+  document.getElementById("formNuevoTicket").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
 
-        // Drag and drop para subir archivos
-        const dropArea = document.querySelector('.border-dashed');
+    const codigos = formData.getAll("codigo[]");
+    const cantidades = formData.getAll("cantidad[]");
+    const materiales = [];
 
-        dropArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropArea.classList.add('border-purple-500', 'bg-purple-50');
-        });
+    const filas = document.querySelectorAll("#materiales-body-modal tr");
+    for (let i = 0; i < codigos.length; i++) {
+      const fila = filas[i];
+      const nombre = fila.querySelector(".nombre").value || "Desconocido";
+      materiales.push({
+        codigo: codigos[i].trim(),
+        nombre: nombre,
+        cantidad: parseInt(cantidades[i]) || 1
+      });
+    }
 
-        dropArea.addEventListener('dragleave', () => {
-            dropArea.classList.remove('border-purple-500', 'bg-purple-50');
-        });
+    formData.delete("codigo[]");
+    formData.delete("cantidad[]");
+    formData.append("materiales_json", JSON.stringify(materiales));
 
-        dropArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropArea.classList.remove('border-purple-500', 'bg-purple-50');
-
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                document.getElementById('fotoInput').files = files;
-            }
-        });
-    </script>
-</body>
-
+    const resp = await fetch("/guardar_ticket", { method: "POST", body: formData });
+    if (resp.ok) {
+      alert("Ticket generado exitosamente");
+      cerrarModalNuevoTicket();
+      location.reload();
+    } else {
+      alert("Error al generar ticket");
+    }
+  });
+</script>
+  </body>
 </html>
